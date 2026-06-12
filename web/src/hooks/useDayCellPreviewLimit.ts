@@ -1,51 +1,56 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { maxLinesThatFit } from "@/lib/monthPreviewLayout";
 
+const PREVIEW_SECTION_GAP = 2;
 const PREVIEW_LINE_GAP = 2;
-const FALLBACK_LINE_HEIGHT = 12;
+const LINE_HEIGHT = { base: 12, sm: 13 };
 
-export function useDayCellPreviewLimit(
-  previewAreaRef: RefObject<HTMLElement | null>,
-  previewCount: number,
-) {
+function getPreviewLineHeight(): number {
+  return window.matchMedia("(min-width: 640px)").matches
+    ? LINE_HEIGHT.sm
+    : LINE_HEIGHT.base;
+}
+
+function measurePreviewLimit(cell: HTMLButtonElement, previewCount: number): number {
+  if (previewCount === 0 || cell.clientHeight <= 0) return 0;
+
+  const styles = getComputedStyle(cell);
+  const paddingY =
+    Number.parseFloat(styles.paddingTop) + Number.parseFloat(styles.paddingBottom);
+  const headerHeight = cell.firstElementChild?.clientHeight ?? 28;
+  const available = cell.clientHeight - paddingY - headerHeight - PREVIEW_SECTION_GAP;
+
+  return maxLinesThatFit(available, getPreviewLineHeight(), PREVIEW_LINE_GAP);
+}
+
+export function useDayCellPreviewLimit(previewCount: number) {
   const cellRef = useRef<HTMLButtonElement>(null);
-  const [maxPreviewLines, setMaxPreviewLines] = useState(previewCount);
+  const [maxPreviewLines, setMaxPreviewLines] = useState(() => previewCount);
 
-  useEffect(() => {
-    setMaxPreviewLines(previewCount);
-  }, [previewCount]);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     const cell = cellRef.current;
-    if (!cell || previewCount === 0) return;
+    if (!cell) return;
 
     const update = () => {
-      const previewArea = previewAreaRef.current;
-      const sampleLine = previewArea?.querySelector("p");
-
-      let available = previewArea?.clientHeight ?? 0;
-      if (available <= 0) {
-        const styles = getComputedStyle(cell);
-        const paddingY =
-          Number.parseFloat(styles.paddingTop) + Number.parseFloat(styles.paddingBottom);
-        const headerHeight = cell.firstElementChild?.clientHeight ?? 28;
-        available = cell.clientHeight - paddingY - headerHeight - 2;
+      const next = measurePreviewLimit(cell, previewCount);
+      if (next > 0) {
+        setMaxPreviewLines(next);
       }
-      if (available <= 0) return;
-
-      const lineHeight = sampleLine?.getBoundingClientRect().height ?? FALLBACK_LINE_HEIGHT;
-      const next = maxLinesThatFit(available, lineHeight, PREVIEW_LINE_GAP);
-
-      setMaxPreviewLines((current) => (current === next ? current : next));
     };
 
     update();
     const observer = new ResizeObserver(update);
     observer.observe(cell);
-    if (previewAreaRef.current) observer.observe(previewAreaRef.current);
 
-    return () => observer.disconnect();
-  }, [previewAreaRef, previewCount]);
+    window.visualViewport?.addEventListener("resize", update);
+    return () => {
+      observer.disconnect();
+      window.visualViewport?.removeEventListener("resize", update);
+    };
+  }, [previewCount]);
 
-  return { cellRef, maxPreviewLines };
+  return {
+    cellRef,
+    maxPreviewLines: previewCount === 0 ? 0 : maxPreviewLines,
+  };
 }

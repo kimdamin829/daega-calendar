@@ -1,4 +1,3 @@
-import { useRef } from "react";
 import { isFutureDate, toDateString } from "@/lib/dateUtils";
 import { type DaySummary } from "@/lib/monthSummary";
 import { getMonthChipClass } from "@/lib/reservationColors";
@@ -25,13 +24,12 @@ export function DayCell({
 }: DayCellProps) {
   const dayNumber = day.getDate();
   const showPreviews = showReservationsForMonth && !isFutureDate(day);
-  const previewAreaRef = useRef<HTMLDivElement>(null);
-  const { cellRef, maxPreviewLines } = useDayCellPreviewLimit(
-    previewAreaRef,
-    showPreviews ? summary.previews.length : 0,
+  const previewCount = showPreviews ? summary.previews.length : 0;
+  const { cellRef, maxPreviewLines } = useDayCellPreviewLimit(previewCount);
+  const visiblePreviews = summary.previews.slice(
+    0,
+    Math.min(summary.previews.length, maxPreviewLines),
   );
-  const renderLimit = Math.min(summary.previews.length, maxPreviewLines);
-  const visiblePreviews = summary.previews.slice(0, renderLimit);
 
   return (
     <button
@@ -62,16 +60,13 @@ export function DayCell({
         </span>
       </div>
 
-      {showPreviews && summary.previews.length > 0 && (
-        <div
-          ref={previewAreaRef}
-          className="mt-0.5 flex min-h-0 flex-1 flex-col gap-0.5 overflow-hidden"
-        >
+      {showPreviews && visiblePreviews.length > 0 && (
+        <div className="mt-0.5 flex min-h-0 flex-1 flex-col gap-0.5 overflow-hidden">
           {visiblePreviews.map((preview, index) => (
             <p
               key={`${preview.label}-${index}`}
               className={[
-                "block min-w-0 shrink-0 overflow-hidden text-clip whitespace-nowrap px-1 text-[10px] leading-tight sm:text-[11px]",
+                "block min-h-[12px] min-w-0 shrink-0 overflow-hidden text-clip whitespace-nowrap px-1 text-[10px] leading-none sm:min-h-[13px] sm:text-[11px]",
                 getMonthChipClass(preview.color),
               ].join(" ")}
             >
