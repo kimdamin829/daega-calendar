@@ -47,5 +47,7 @@ body {
 }
 
 #root {
-  min-height: 100dvh;
+  height: var(--app-height, 100dvh);
+  min-height: 0;
+  overflow: hidden;
 }

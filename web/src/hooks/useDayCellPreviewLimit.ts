@@ -4,9 +4,9 @@ import {
   maxMonthPreviewLines,
 } from "@/lib/monthPreviewLayout";
 
-export function useMonthGridMetrics(weekCount: number) {
-  const gridRef = useRef<HTMLDivElement>(null);
-  const [rowHeight, setRowHeight] = useState(64);
+export function useDayCellPreviewLimit() {
+  const cellRef = useRef<HTMLButtonElement>(null);
+  const [maxPreviewLines, setMaxPreviewLines] = useState(1);
   const [compact, setCompact] = useState(
     () => !window.matchMedia("(min-width: 640px)").matches,
   );
@@ -19,24 +19,19 @@ export function useMonthGridMetrics(weekCount: number) {
   }, []);
 
   useEffect(() => {
-    const grid = gridRef.current;
-    if (!grid) return;
+    const cell = cellRef.current;
+    if (!cell) return;
 
     const update = () => {
-      const nextRowHeight = grid.clientHeight / weekCount;
-      if (nextRowHeight > 0) {
-        setRowHeight(nextRowHeight);
-      }
+      const lineHeight = getMonthPreviewLineHeight(compact);
+      setMaxPreviewLines(maxMonthPreviewLines(cell.clientHeight, lineHeight));
     };
 
     update();
     const observer = new ResizeObserver(update);
-    observer.observe(grid);
+    observer.observe(cell);
     return () => observer.disconnect();
-  }, [weekCount]);
+  }, [compact]);
 
-  const lineHeight = getMonthPreviewLineHeight(compact);
-  const maxPreviewLines = maxMonthPreviewLines(rowHeight, lineHeight);
-
-  return { gridRef, maxPreviewLines };
+  return { cellRef, maxPreviewLines };
 }

@@ -12,7 +12,6 @@ import {
 import { type DaySummary } from "@/lib/monthSummary";
 import { DayCell } from "@/components/DayCell";
 import { useHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
-import { useMonthGridMetrics } from "@/hooks/useMonthGridMetrics";
 
 interface MonthCalendarProps {
   month: Date;
@@ -41,7 +40,6 @@ export function MonthCalendar({
   });
 
   const weekCount = Math.ceil(days.length / 7);
-  const { gridRef, maxPreviewLines } = useMonthGridMetrics(weekCount);
 
   return (
     <section className="flex min-h-0 flex-1 flex-col px-0 pb-4">
@@ -66,8 +64,7 @@ export function MonthCalendar({
         </div>
 
         <div
-          ref={gridRef}
-          className="grid min-h-0 flex-1 grid-cols-7 border-l-gcal-grid"
+          className="grid min-h-0 flex-1 grid-cols-7 overflow-hidden border-l-gcal-grid"
           style={{ gridTemplateRows: `repeat(${weekCount}, minmax(0, 1fr))` }}
         >
           {days.map((day) => {
@@ -82,7 +79,6 @@ export function MonthCalendar({
                 isSelected={selectedDate ? isSameDate(day, selectedDate) : false}
                 showReservations={showReservationPreviews}
                 summary={getDaySummary(dateKey)}
-                maxPreviewLines={maxPreviewLines}
                 onSelect={onDateSelect}
               />
             );

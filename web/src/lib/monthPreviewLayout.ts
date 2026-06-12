@@ -4,7 +4,7 @@ export const MONTH_PREVIEW_LAYOUT = {
   dayNumberHeight: 28,
   previewSectionGap: 2,
   previewLineGap: 2,
-  lineHeight: { base: 13, sm: 15 },
+  lineHeight: { base: 17, sm: 15 },
 } as const;
 
 export function getMonthPreviewLineHeight(compact: boolean): number {

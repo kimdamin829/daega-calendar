@@ -1,6 +1,7 @@
 import { isFutureDate, toDateString } from "@/lib/dateUtils";
 import { type DaySummary } from "@/lib/monthSummary";
 import { getMonthChipClass } from "@/lib/reservationColors";
+import { useDayCellPreviewLimit } from "@/hooks/useDayCellPreviewLimit";
 
 interface DayCellProps {
   day: Date;
@@ -9,7 +10,6 @@ interface DayCellProps {
   isSelected: boolean;
   showReservations: boolean;
   summary: DaySummary;
-  maxPreviewLines: number;
   onSelect: (day: Date) => void;
 }
 
@@ -20,19 +20,20 @@ export function DayCell({
   isSelected,
   showReservations: showReservationsForMonth,
   summary,
-  maxPreviewLines,
   onSelect,
 }: DayCellProps) {
   const dayNumber = day.getDate();
   const showPreviews = showReservationsForMonth && !isFutureDate(day);
+  const { cellRef, maxPreviewLines } = useDayCellPreviewLimit();
   const visiblePreviews = summary.previews.slice(0, maxPreviewLines);
 
   return (
     <button
+      ref={cellRef}
       type="button"
       onClick={() => onSelect(day)}
       className={[
-        "flex h-full w-full min-w-0 flex-col border-r-gcal-grid border-b-gcal-grid pt-1 pb-1 text-left transition-colors sm:min-h-[64px]",
+        "flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden border-r-gcal-grid border-b-gcal-grid pt-1 pb-1 text-left transition-colors sm:min-h-[64px]",
         isSelected && !isToday ? "bg-gcal-blue-light" : "",
         !isSelected && isCurrentMonth ? "hover:bg-[#f1f3f4]" : "",
       ]

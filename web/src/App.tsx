@@ -108,7 +108,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex h-dvh w-full flex-col bg-white">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
       <MonthViewHeader month={month} onMonthChange={setMonth} />
       <MonthPickerBar month={month} onMonthChange={setMonth} />
 
