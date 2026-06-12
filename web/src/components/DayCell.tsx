@@ -1,7 +1,6 @@
 import { isFutureDate, toDateString } from "@/lib/dateUtils";
 import { type DaySummary } from "@/lib/monthSummary";
 import { getMonthChipClass } from "@/lib/reservationColors";
-import { useDayCellPreviewLimit } from "@/hooks/useDayCellPreviewLimit";
 
 interface DayCellProps {
   day: Date;
@@ -9,6 +8,7 @@ interface DayCellProps {
   isToday: boolean;
   isSelected: boolean;
   showReservations: boolean;
+  maxPreviewLines: number;
   summary: DaySummary;
   onSelect: (day: Date) => void;
 }
@@ -19,21 +19,18 @@ export function DayCell({
   isToday,
   isSelected,
   showReservations: showReservationsForMonth,
+  maxPreviewLines,
   summary,
   onSelect,
 }: DayCellProps) {
   const dayNumber = day.getDate();
   const showPreviews = showReservationsForMonth && !isFutureDate(day);
-  const previewCount = showPreviews ? summary.previews.length : 0;
-  const { cellRef, maxPreviewLines } = useDayCellPreviewLimit(previewCount);
-  const visiblePreviews = summary.previews.slice(
-    0,
-    Math.min(summary.previews.length, maxPreviewLines),
-  );
+  const visiblePreviews = showPreviews
+    ? summary.previews.slice(0, maxPreviewLines)
+    : [];
 
   return (
     <button
-      ref={cellRef}
       type="button"
       onClick={() => onSelect(day)}
       className={[
@@ -60,7 +57,7 @@ export function DayCell({
         </span>
       </div>
 
-      {showPreviews && visiblePreviews.length > 0 && (
+      {visiblePreviews.length > 0 && (
         <div className="mt-0.5 flex min-h-0 flex-1 flex-col gap-0.5 overflow-hidden">
           {visiblePreviews.map((preview, index) => (
             <p
