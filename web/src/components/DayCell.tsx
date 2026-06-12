@@ -9,6 +9,7 @@ interface DayCellProps {
   isSelected: boolean;
   showReservations: boolean;
   summary: DaySummary;
+  maxPreviewLines: number;
   onSelect: (day: Date) => void;
 }
 
@@ -19,10 +20,12 @@ export function DayCell({
   isSelected,
   showReservations: showReservationsForMonth,
   summary,
+  maxPreviewLines,
   onSelect,
 }: DayCellProps) {
   const dayNumber = day.getDate();
   const showPreviews = showReservationsForMonth && !isFutureDate(day);
+  const visiblePreviews = summary.previews.slice(0, maxPreviewLines);
 
   return (
     <button
@@ -52,9 +55,9 @@ export function DayCell({
         </span>
       </div>
 
-      {showPreviews && summary.previews.length > 0 && (
+      {showPreviews && visiblePreviews.length > 0 && (
         <div className="mt-0.5 flex w-full min-h-0 flex-1 flex-col gap-0.5 overflow-hidden">
-          {summary.previews.map((preview, index) => (
+          {visiblePreviews.map((preview, index) => (
             <p
               key={`${preview.label}-${index}`}
               className={[
