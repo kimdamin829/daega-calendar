@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { isFutureDate, toDateString } from "@/lib/dateUtils";
 import { type DaySummary } from "@/lib/monthSummary";
 import { getMonthChipClass } from "@/lib/reservationColors";
@@ -24,8 +25,13 @@ export function DayCell({
 }: DayCellProps) {
   const dayNumber = day.getDate();
   const showPreviews = showReservationsForMonth && !isFutureDate(day);
-  const { cellRef, maxPreviewLines } = useDayCellPreviewLimit();
-  const visiblePreviews = summary.previews.slice(0, maxPreviewLines);
+  const previewAreaRef = useRef<HTMLDivElement>(null);
+  const { cellRef, maxPreviewLines } = useDayCellPreviewLimit(
+    previewAreaRef,
+    showPreviews ? summary.previews.length : 0,
+  );
+  const renderLimit = Math.min(summary.previews.length, maxPreviewLines);
+  const visiblePreviews = summary.previews.slice(0, renderLimit);
 
   return (
     <button
@@ -42,7 +48,7 @@ export function DayCell({
       aria-label={`${toDateString(day)} 선택`}
       aria-pressed={isSelected}
     >
-      <div className="flex justify-center">
+      <div className="flex shrink-0 justify-center">
         <span
           className={[
             "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-medium",
@@ -56,13 +62,16 @@ export function DayCell({
         </span>
       </div>
 
-      {showPreviews && visiblePreviews.length > 0 && (
-        <div className="mt-0.5 flex w-full min-h-0 flex-1 flex-col gap-0.5 overflow-hidden">
+      {showPreviews && summary.previews.length > 0 && (
+        <div
+          ref={previewAreaRef}
+          className="mt-0.5 flex min-h-0 flex-1 flex-col gap-0.5 overflow-hidden"
+        >
           {visiblePreviews.map((preview, index) => (
             <p
               key={`${preview.label}-${index}`}
               className={[
-                "block min-w-0 overflow-hidden text-clip whitespace-nowrap px-1 text-[10px] leading-tight sm:text-[11px]",
+                "block min-w-0 shrink-0 overflow-hidden text-clip whitespace-nowrap px-1 text-[10px] leading-tight sm:text-[11px]",
                 getMonthChipClass(preview.color),
               ].join(" ")}
             >

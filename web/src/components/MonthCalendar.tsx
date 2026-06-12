@@ -42,7 +42,7 @@ export function MonthCalendar({
   const weekCount = Math.ceil(days.length / 7);
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col px-0 pb-4">
+    <section className="flex min-h-0 flex-1 flex-col px-0 pb-2">
       <div
         className="flex min-h-0 flex-1 flex-col touch-pan-y"
         onPointerDown={swipe.onPointerDown}

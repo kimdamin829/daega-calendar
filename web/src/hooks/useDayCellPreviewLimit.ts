@@ -1,37 +1,51 @@
-import { useEffect, useRef, useState } from "react";
-import {
-  getMonthPreviewLineHeight,
-  maxMonthPreviewLines,
-} from "@/lib/monthPreviewLayout";
+import { useEffect, useRef, useState, type RefObject } from "react";
+import { maxLinesThatFit } from "@/lib/monthPreviewLayout";
 
-export function useDayCellPreviewLimit() {
+const PREVIEW_LINE_GAP = 2;
+const FALLBACK_LINE_HEIGHT = 12;
+
+export function useDayCellPreviewLimit(
+  previewAreaRef: RefObject<HTMLElement | null>,
+  previewCount: number,
+) {
   const cellRef = useRef<HTMLButtonElement>(null);
-  const [maxPreviewLines, setMaxPreviewLines] = useState(1);
-  const [compact, setCompact] = useState(
-    () => !window.matchMedia("(min-width: 640px)").matches,
-  );
+  const [maxPreviewLines, setMaxPreviewLines] = useState(previewCount);
 
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 640px)");
-    const onChange = () => setCompact(!media.matches);
-    media.addEventListener("change", onChange);
-    return () => media.removeEventListener("change", onChange);
-  }, []);
+    setMaxPreviewLines(previewCount);
+  }, [previewCount]);
 
   useEffect(() => {
     const cell = cellRef.current;
-    if (!cell) return;
+    if (!cell || previewCount === 0) return;
 
     const update = () => {
-      const lineHeight = getMonthPreviewLineHeight(compact);
-      setMaxPreviewLines(maxMonthPreviewLines(cell.clientHeight, lineHeight));
+      const previewArea = previewAreaRef.current;
+      const sampleLine = previewArea?.querySelector("p");
+
+      let available = previewArea?.clientHeight ?? 0;
+      if (available <= 0) {
+        const styles = getComputedStyle(cell);
+        const paddingY =
+          Number.parseFloat(styles.paddingTop) + Number.parseFloat(styles.paddingBottom);
+        const headerHeight = cell.firstElementChild?.clientHeight ?? 28;
+        available = cell.clientHeight - paddingY - headerHeight - 2;
+      }
+      if (available <= 0) return;
+
+      const lineHeight = sampleLine?.getBoundingClientRect().height ?? FALLBACK_LINE_HEIGHT;
+      const next = maxLinesThatFit(available, lineHeight, PREVIEW_LINE_GAP);
+
+      setMaxPreviewLines((current) => (current === next ? current : next));
     };
 
     update();
     const observer = new ResizeObserver(update);
     observer.observe(cell);
+    if (previewAreaRef.current) observer.observe(previewAreaRef.current);
+
     return () => observer.disconnect();
-  }, [compact]);
+  }, [previewAreaRef, previewCount]);
 
   return { cellRef, maxPreviewLines };
 }
