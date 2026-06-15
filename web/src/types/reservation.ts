@@ -1,10 +1,10 @@
 import type { ReservationColor } from "@/lib/reservationColors";
+import type { PartyCounts } from "@/lib/partyCounts";
 
-export interface Reservation {
+export interface Reservation extends PartyCounts {
   id: string;
   date: string;
   time: string;
-  party_size: number;
   guest_name: string;
   seat: string | null;
   memo: string | null;
@@ -15,10 +15,9 @@ export interface Reservation {
   updated_at: string;
 }
 
-export interface ReservationContent {
+export interface ReservationContent extends PartyCounts {
   date: string;
   time: string;
-  party_size: number;
   guest_name: string;
   seat: string | null;
   memo: string | null;

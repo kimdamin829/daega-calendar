@@ -1,4 +1,5 @@
 import { formatReservationLine, formatTime, PLACEHOLDER_TIME } from "@/lib/formatReservation";
+import { getPartySize } from "@/lib/partyCounts";
 
 export function isPlaceholderReservation(reservation: { guest_name: string }): boolean {
   return !reservation.guest_name || reservation.guest_name === "새 예약";
@@ -36,21 +37,26 @@ export function shouldShowOnDayTimeline(
 
 function formatPartialReservationLine(reservation: {
   time: string;
-  party_size: number;
+  adult_count: number;
+  child_count: number;
+  infant_count: number;
 }): string {
   const parts: string[] = [];
   if (reservation.time !== PLACEHOLDER_TIME) {
     parts.push(formatTime(reservation.time));
   }
-  if (reservation.party_size > 1) {
-    parts.push(`${reservation.party_size}명`);
+  const partySize = getPartySize(reservation);
+  if (partySize > 1) {
+    parts.push(`${partySize}명`);
   }
   return parts.join(" ");
 }
 
 function formatReservationDisplay(reservation: {
   time: string;
-  party_size: number;
+  adult_count: number;
+  child_count: number;
+  infant_count: number;
   guest_name: string;
   seat: string | null;
   memo: string | null;

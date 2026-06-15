@@ -3,6 +3,7 @@ import { ko } from "date-fns/locale";
 import type { Reservation } from "@/types/reservation";
 import { PLACEHOLDER_TIME } from "@/lib/formatReservation";
 import { maskGuestName } from "@/lib/maskGuestName";
+import { getPartySize } from "@/lib/partyCounts";
 import {
   isPlaceholderReservation,
   isUnparsedDraft,
@@ -64,7 +65,7 @@ function toBoardEntry(reservation: Reservation): BoardEntry {
   return {
     time: formatBoardDisplayTime(reservation.time),
     guestName: formatBoardGuestName(reservation.guest_name),
-    partySize: reservation.party_size,
+    partySize: getPartySize(reservation),
     seat: reservation.seat,
   };
 }

@@ -2,6 +2,7 @@ import type { Reservation } from "@/types/reservation";
 import { clampMinutes, DEFAULT_DURATION } from "@/lib/dayGrid";
 import { newId } from "@/lib/newId";
 import { PLACEHOLDER_TIME } from "@/lib/formatReservation";
+import { DEFAULT_PARTY_COUNTS } from "@/lib/partyCounts";
 
 export function createPendingReservation(
   date: string,
@@ -15,7 +16,7 @@ export function createPendingReservation(
     id: newId(),
     date,
     time: PLACEHOLDER_TIME,
-    party_size: 1,
+    ...DEFAULT_PARTY_COUNTS,
     guest_name: "",
     seat: null,
     memo: null,

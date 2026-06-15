@@ -1,4 +1,5 @@
 import type { ReservationContent } from "@/types/reservation";
+import { toPartyCounts } from "@/lib/partyCounts";
 
 export class ParseError extends Error {
   constructor(message: string) {
@@ -54,7 +55,7 @@ export function parseReservationInput(raw: string, date: string): ReservationCon
   }
 
   const time = normalizeTime(parts[0]);
-  const party_size = parsePartySize(parts[1]);
+  const partyCounts = toPartyCounts(parsePartySize(parts[1]));
   const guest_name = parts[2] ?? "";
   const seat = parts[3] ?? null;
   const memo = parts.length > 4 ? parts.slice(4).join(" ") : null;
@@ -62,7 +63,7 @@ export function parseReservationInput(raw: string, date: string): ReservationCon
   return {
     date,
     time,
-    party_size,
+    ...partyCounts,
     guest_name,
     seat,
     memo,

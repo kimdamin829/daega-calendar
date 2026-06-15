@@ -13,6 +13,7 @@ import {
 import { subscribeReservations } from "@/lib/realtime";
 import { toDateString } from "@/lib/dateUtils";
 import { parseReservationInput, ParseError } from "@/lib/parseReservation";
+import { DEFAULT_PARTY_COUNTS } from "@/lib/partyCounts";
 import {
   EMPTY_DAY_SUMMARY,
   summarizeReservationsByDate,
@@ -107,7 +108,9 @@ export function useReservations(month: Date, selectedDate: Date) {
         const parsed = parseReservationInput(raw, selectedDateKey);
         const payload = {
           time: parsed.time,
-          party_size: parsed.party_size,
+          adult_count: parsed.adult_count,
+          child_count: parsed.child_count,
+          infant_count: parsed.infant_count,
           guest_name: parsed.guest_name,
           seat: parsed.seat,
           memo: parsed.memo,
@@ -128,7 +131,7 @@ export function useReservations(month: Date, selectedDate: Date) {
 
         const payload = {
           time: PLACEHOLDER_TIME,
-          party_size: 1,
+          ...DEFAULT_PARTY_COUNTS,
           guest_name: "",
           seat: null,
           memo: raw.trim(),

@@ -4,6 +4,7 @@ import type {
   ReservationInput,
   ReservationPositionUpdate,
 } from "@/types/reservation";
+import { DEFAULT_PARTY_COUNTS } from "@/lib/partyCounts";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -19,6 +20,9 @@ function normalizeReservationRow(row: Reservation): Reservation {
 
   return {
     ...row,
+    adult_count: row.adult_count ?? DEFAULT_PARTY_COUNTS.adult_count,
+    child_count: row.child_count ?? DEFAULT_PARTY_COUNTS.child_count,
+    infant_count: row.infant_count ?? DEFAULT_PARTY_COUNTS.infant_count,
     start_minutes: startMinutes === 0 ? 540 : startMinutes,
     duration_minutes: row.duration_minutes ?? 60,
     color: row.color ?? null,
