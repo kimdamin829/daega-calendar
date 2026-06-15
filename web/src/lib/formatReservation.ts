@@ -1,5 +1,5 @@
 import type { PartyCounts } from "@/lib/partyCounts";
-import { getPartySize } from "@/lib/partyCounts";
+import { formatPartyLabel, shouldShowPartyLabel } from "@/lib/partyCounts";
 
 /** 타임라인에서 새 블록 생성 시 time 컬럼용 — 실제 예약 시간과 무관 */
 export const PLACEHOLDER_TIME = "00:00:00";
@@ -24,7 +24,6 @@ export function formatReservationLine(
     memo: string | null;
   },
 ): string {
-  const partySize = getPartySize(reservation);
   const segments: string[] = [];
 
   if (hasRealTime(reservation.time)) {
@@ -32,12 +31,12 @@ export function formatReservationLine(
   }
 
   if (reservation.guest_name) {
-    if (partySize > 1) {
-      segments.push(`${partySize}명`);
+    if (shouldShowPartyLabel(reservation)) {
+      segments.push(formatPartyLabel(reservation));
     }
     segments.push(reservation.guest_name);
-  } else if (partySize > 1) {
-    segments.push(`${partySize}명`);
+  } else if (shouldShowPartyLabel(reservation)) {
+    segments.push(formatPartyLabel(reservation));
   }
 
   const base = segments.join(" ");

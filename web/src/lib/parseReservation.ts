@@ -1,5 +1,5 @@
 import type { ReservationContent } from "@/types/reservation";
-import { toPartyCounts } from "@/lib/partyCounts";
+import { parsePartyCounts, PartyCountParseError } from "@/lib/partyCounts";
 
 export class ParseError extends Error {
   constructor(message: string) {
@@ -34,15 +34,15 @@ function normalizeTime(raw: string): string {
   throw new ParseError("시간 형식이 올바르지 않습니다. (예: 10:00)");
 }
 
-function parsePartySize(raw: string): number {
-  const cleaned = raw.replace(/명$/, "").trim();
-  const size = Number(cleaned);
-
-  if (!Number.isInteger(size) || size <= 0) {
-    throw new ParseError("인원수 형식이 올바르지 않습니다. (예: 4, 4명)");
+function parsePartyCountsField(raw: string) {
+  try {
+    return parsePartyCounts(raw);
+  } catch (err) {
+    if (err instanceof PartyCountParseError) {
+      throw new ParseError(err.message);
+    }
+    throw err;
   }
-
-  return size;
 }
 
 export function parseReservationInput(raw: string, date: string): ReservationContent {
@@ -50,12 +50,12 @@ export function parseReservationInput(raw: string, date: string): ReservationCon
 
   if (parts.length < 2) {
     throw new ParseError(
-      "형식: 시간 인원 [이름] [좌석] [메모…]\n예: 7:00 4명 김다민",
+      "형식: 시간 인원 [이름] [좌석] [메모…]\n예: 7:00 4명 김다민, 7:00 10.2명 김다민",
     );
   }
 
   const time = normalizeTime(parts[0]);
-  const partyCounts = toPartyCounts(parsePartySize(parts[1]));
+  const partyCounts = parsePartyCountsField(parts[1]);
   const guest_name = parts[2] ?? "";
   const seat = parts[3] ?? null;
   const memo = parts.length > 4 ? parts.slice(4).join(" ") : null;

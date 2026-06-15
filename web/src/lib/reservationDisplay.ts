@@ -1,5 +1,5 @@
 import { formatReservationLine, formatTime, PLACEHOLDER_TIME } from "@/lib/formatReservation";
-import { getPartySize } from "@/lib/partyCounts";
+import { formatPartyLabel, shouldShowPartyLabel } from "@/lib/partyCounts";
 
 export function isPlaceholderReservation(reservation: { guest_name: string }): boolean {
   return !reservation.guest_name || reservation.guest_name === "새 예약";
@@ -45,9 +45,8 @@ function formatPartialReservationLine(reservation: {
   if (reservation.time !== PLACEHOLDER_TIME) {
     parts.push(formatTime(reservation.time));
   }
-  const partySize = getPartySize(reservation);
-  if (partySize > 1) {
-    parts.push(`${partySize}명`);
+  if (shouldShowPartyLabel(reservation)) {
+    parts.push(formatPartyLabel(reservation));
   }
   return parts.join(" ");
 }

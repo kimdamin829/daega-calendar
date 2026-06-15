@@ -3,7 +3,7 @@ import { ko } from "date-fns/locale";
 import type { Reservation } from "@/types/reservation";
 import { PLACEHOLDER_TIME } from "@/lib/formatReservation";
 import { maskGuestName } from "@/lib/maskGuestName";
-import { getPartySize } from "@/lib/partyCounts";
+import { formatPartyLabel } from "@/lib/partyCounts";
 import {
   isPlaceholderReservation,
   isUnparsedDraft,
@@ -13,7 +13,7 @@ import { formatBoardDisplayTime, resolveTimeToMinutes } from "@/lib/timeResolve"
 export interface BoardEntry {
   time: string;
   guestName: string;
-  partySize: number;
+  partySize: string;
   seat: string | null;
 }
 
@@ -65,7 +65,7 @@ function toBoardEntry(reservation: Reservation): BoardEntry {
   return {
     time: formatBoardDisplayTime(reservation.time),
     guestName: formatBoardGuestName(reservation.guest_name),
-    partySize: getPartySize(reservation),
+    partySize: formatPartyLabel(reservation),
     seat: reservation.seat,
   };
 }
@@ -84,7 +84,7 @@ export function buildStatusBoard(reservations: Reservation[]): StatusBoardColumn
 }
 
 export function formatBoardLine(entry: BoardEntry): string {
-  const parts = [entry.time, entry.guestName, `${entry.partySize}명`];
+  const parts = [entry.time, entry.guestName, entry.partySize];
   if (entry.seat) parts.push(entry.seat);
   return parts.join(" ");
 }
