@@ -32,6 +32,7 @@ import {
   yToMinutes,
 } from "@/lib/dayGrid";
 import { layoutReservations } from "@/lib/overlapLayout";
+import { compareReservationsByTime } from "@/lib/reservationSort";
 
 interface DayViewProps {
   date: Date;
@@ -110,7 +111,7 @@ export function DayView({
     const list =
       !pending || reservations.some((r) => r.id === pending.id)
         ? reservations
-        : [...reservations, pending].sort((a, b) => a.start_minutes - b.start_minutes);
+        : [...reservations, pending].sort(compareReservationsByTime);
 
     if (!positionPreview) return list;
 

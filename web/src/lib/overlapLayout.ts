@@ -1,4 +1,5 @@
 import type { Reservation } from "@/types/reservation";
+import { compareReservationsByTime } from "@/lib/reservationSort";
 
 export interface BlockLayout {
   column: number;
@@ -12,18 +13,8 @@ function overlapsTimeline(a: Reservation, b: Reservation): boolean {
   );
 }
 
-function compareReservations(a: Reservation, b: Reservation): number {
-  const startDiff = a.start_minutes - b.start_minutes;
-  if (startDiff !== 0) return startDiff;
-
-  const created = a.created_at.localeCompare(b.created_at);
-  if (created !== 0) return created;
-
-  return a.id.localeCompare(b.id);
-}
-
 function getOverlapGroups(reservations: Reservation[]): Reservation[][] {
-  const sorted = [...reservations].sort(compareReservations);
+  const sorted = [...reservations].sort(compareReservationsByTime);
   const visited = new Set<string>();
   const groups: Reservation[][] = [];
 
@@ -57,7 +48,7 @@ export function layoutReservations(reservations: Reservation[]): Map<string, Blo
   const layouts = new Map<string, BlockLayout>();
 
   for (const group of getOverlapGroups(reservations)) {
-    const groupSorted = [...group].sort(compareReservations);
+    const groupSorted = [...group].sort(compareReservationsByTime);
     const totalColumns = groupSorted.length;
 
     groupSorted.forEach((event, column) => {

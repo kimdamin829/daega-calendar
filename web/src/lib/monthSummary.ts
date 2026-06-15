@@ -6,7 +6,7 @@ import {
   isPlaceholderReservation,
   isUnparsedDraft,
 } from "@/lib/reservationDisplay";
-import { resolveTimeToMinutes } from "@/lib/timeResolve";
+import { compareReservationsByTime } from "@/lib/reservationSort";
 
 interface MonthPreview {
   label: string;
@@ -19,24 +19,6 @@ export interface DaySummary {
 
 export const EMPTY_DAY_SUMMARY: DaySummary = { previews: [] };
 
-function getMonthPreviewSortMinutes(reservation: Reservation): number {
-  if (isUnparsedDraft(reservation) || reservation.time === PLACEHOLDER_TIME) {
-    return reservation.start_minutes;
-  }
-
-  return resolveTimeToMinutes(reservation.time);
-}
-
-function compareMonthPreviews(a: Reservation, b: Reservation): number {
-  const timeDiff = getMonthPreviewSortMinutes(a) - getMonthPreviewSortMinutes(b);
-  if (timeDiff !== 0) return timeDiff;
-
-  const created = a.created_at.localeCompare(b.created_at);
-  if (created !== 0) return created;
-
-  return a.id.localeCompare(b.id);
-}
-
 function buildMonthPreviews(reservations: Reservation[]): MonthPreview[] {
   const valid = reservations.filter(
     (reservation) =>
@@ -44,7 +26,7 @@ function buildMonthPreviews(reservations: Reservation[]): MonthPreview[] {
       (!isPlaceholderReservation(reservation) && reservation.time !== PLACEHOLDER_TIME),
   );
 
-  return [...valid].sort(compareMonthPreviews).map((reservation) => ({
+  return [...valid].sort(compareReservationsByTime).map((reservation) => ({
     label: formatReservationDisplay(reservation),
     color: reservation.color,
   }));

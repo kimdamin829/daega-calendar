@@ -12,6 +12,7 @@ import {
 import { toDateString } from "@/lib/dateUtils";
 import { parseReservationInput, ParseError } from "@/lib/parseReservation";
 import { DEFAULT_PARTY_COUNTS } from "@/lib/partyCounts";
+import { compareReservationsByTime } from "@/lib/reservationSort";
 import {
   EMPTY_DAY_SUMMARY,
   summarizeReservationsByDate,
@@ -51,7 +52,7 @@ export function useReservations(month: Date, selectedDate: Date) {
     () =>
       reservations
         .filter((reservation) => reservation.date === selectedDateKey)
-        .sort((a, b) => a.start_minutes - b.start_minutes),
+        .sort(compareReservationsByTime),
     [reservations, selectedDateKey],
   );
 
@@ -81,7 +82,7 @@ export function useReservations(month: Date, selectedDate: Date) {
       const replaceDraft = (saved: Reservation) => {
         setReservations((prev) =>
           [...prev.filter((reservation) => reservation.id !== draft.id), saved].sort(
-            (a, b) => a.start_minutes - b.start_minutes,
+            compareReservationsByTime,
           ),
         );
         return saved;
