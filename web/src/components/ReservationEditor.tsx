@@ -114,7 +114,7 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
       <div ref={panelRef} className="w-full">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-3">
-            <p className="shrink-0 text-base font-medium text-[#3c4043]">예약 입력</p>
+            <p className="shrink-0 text-base font-medium text-[#3c4043]">예약</p>
             <div className="flex items-center gap-2">
               {COLOR_SWATCHES.map((option) => (
                 <button
