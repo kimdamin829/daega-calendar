@@ -51,7 +51,7 @@ export const RESERVATION_COLORS: {
   {
     id: "gray",
     label: "회색",
-    block: "border-gray-400 bg-gray-200 text-gray-950",
+    block: "border-gray-500 bg-gray-300 text-gray-950",
     swatch: "bg-gray-400",
     ring: "ring-gray-400",
   },
