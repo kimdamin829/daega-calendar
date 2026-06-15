@@ -1,15 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import type { BoardEntry } from "@/lib/statusBoard";
-import { formatBoardTitle } from "@/lib/statusBoard";
+import type { PartyTier } from "@/lib/partyCounts";
+import { BOARD_COLUMN_SIZE, formatBoardTitle, type BoardEntry } from "@/lib/statusBoard";
 
 const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
 const BOARD_BG = "#f0ebf8";
+const BOARD_TEXT = "font-bold text-[#3c4043]";
 
-/** 각 칸(왼/오) 안에서 시간 · 이름 · 인원 너비 (1920px 기준). 좌석은 나머지 */
 const COL_TIME = 170;
 const COL_NAME = 300;
 const COL_PARTY = 220;
+
+const PARTY_TEXT: Record<PartyTier, string> = {
+  1: "text-[52px] leading-none",
+  2: "text-[49px] leading-none",
+  3: "text-[44px] leading-none",
+};
 
 interface BoardViewProps {
   date: Date;
@@ -18,9 +24,8 @@ interface BoardViewProps {
   error: string | null;
 }
 
-function seatTextClass(seat: string): string {
-  if (seat.length > 6) return "text-[42px] leading-tight";
-  return "text-[50px] leading-none";
+function seatTextClass(length: number): string {
+  return length > 6 ? "text-[40px] leading-tight" : "text-[48px] leading-none";
 }
 
 function BoardSeat({ seat }: { seat: string | null }) {
@@ -31,9 +36,9 @@ function BoardSeat({ seat }: { seat: string | null }) {
   return (
     <span
       className={[
-        "min-w-0 flex-1 shrink font-bold text-[#3c4043]",
-        "whitespace-normal break-all text-right",
-        seatTextClass(seat),
+        "min-w-0 flex-1 shrink whitespace-normal break-all text-right",
+        BOARD_TEXT,
+        seatTextClass(seat.length),
       ].join(" ")}
     >
       {seat}
@@ -42,45 +47,42 @@ function BoardSeat({ seat }: { seat: string | null }) {
 }
 
 function BoardRow({ entry }: { entry: BoardEntry | null }) {
-  const cellClass =
-    "text-[54px] leading-none font-bold text-[#3c4043]";
-  const suffixClass = "text-[40px] font-bold leading-none text-[#3c4043]";
+  const cellClass = `text-[52px] leading-none ${BOARD_TEXT}`;
+  const suffixClass = `text-[38px] leading-none ${BOARD_TEXT}`;
+
+  if (!entry) {
+    return <div className="min-h-0 flex-1 px-8" />;
+  }
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 items-center overflow-hidden px-8">
-      {entry ? (
-        <>
-          <span className={`${cellClass} shrink-0 truncate`} style={{ width: COL_TIME }}>
-            {entry.time}
-          </span>
-          <span
-            className={`${cellClass} flex shrink-0 min-w-0 items-baseline`}
-            style={{ width: COL_NAME }}
-          >
-            <span>{entry.guestName}</span>
-            <span className={`${suffixClass} shrink-0`}>님</span>
-          </span>
-          <span
-            className={`${cellClass} flex shrink-0 items-baseline`}
-            style={{ width: COL_PARTY }}
-          >
-            {entry.partySize}
-            <span className={suffixClass}>명</span>
-          </span>
-          <BoardSeat seat={entry.seat} />
-        </>
-      ) : null}
+      <span className={`${cellClass} shrink-0 truncate`} style={{ width: COL_TIME }}>
+        {entry.time}
+      </span>
+      <span
+        className={`${cellClass} flex shrink-0 min-w-0 items-baseline`}
+        style={{ width: COL_NAME }}
+      >
+        <span>{entry.guestName}</span>
+        <span className={`${suffixClass} shrink-0`}>님</span>
+      </span>
+      <span
+        className={`flex shrink-0 items-baseline ${BOARD_TEXT}`}
+        style={{ width: COL_PARTY }}
+      >
+        <span className={PARTY_TEXT[entry.partyTier]}>{entry.partySize}</span>
+        <span className={suffixClass}>명</span>
+      </span>
+      <BoardSeat seat={entry.seat} />
     </div>
   );
 }
 
 function BoardColumn({ entries }: { entries: BoardEntry[] }) {
-  const slots = Array.from({ length: 10 }, (_, index) => entries[index] ?? null);
-
   return (
     <div className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col overflow-hidden py-6">
-      {slots.map((entry, index) => (
-        <BoardRow key={index} entry={entry} />
+      {Array.from({ length: BOARD_COLUMN_SIZE }, (_, index) => (
+        <BoardRow key={index} entry={entries[index] ?? null} />
       ))}
     </div>
   );
@@ -91,15 +93,13 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
-    const updateScale = () => {
-      const container = containerRef.current;
-      if (!container) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-      const nextScale = Math.min(
-        container.clientWidth / DESIGN_WIDTH,
-        container.clientHeight / DESIGN_HEIGHT,
+    const updateScale = () => {
+      setScale(
+        Math.min(container.clientWidth / DESIGN_WIDTH, container.clientHeight / DESIGN_HEIGHT),
       );
-      setScale(nextScale);
     };
 
     updateScale();
@@ -124,7 +124,7 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
         }}
       >
         <header className="flex shrink-0 items-center justify-center pt-10 pb-6">
-          <h1 className="text-[64px] font-bold tracking-tight text-[#3c4043]">
+          <h1 className={`text-[60px] tracking-tight ${BOARD_TEXT}`}>
             {formatBoardTitle(date)}
           </h1>
         </header>
@@ -137,7 +137,7 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
           </div>
 
           {error && (
-            <p className="mt-4 text-center text-[24px] text-red-600">{error}</p>
+            <p className="mt-4 text-center text-[22px] text-red-600">{error}</p>
           )}
         </div>
       </div>

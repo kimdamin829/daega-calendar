@@ -31,5 +31,5 @@ export function useBoardReservations(dateKey: string) {
 
   const board = useMemo(() => buildStatusBoard(reservations), [reservations]);
 
-  return { board, error, dateKey };
+  return { board, error };
 }

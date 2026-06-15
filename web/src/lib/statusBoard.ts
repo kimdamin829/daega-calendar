@@ -3,7 +3,7 @@ import { ko } from "date-fns/locale";
 import type { Reservation } from "@/types/reservation";
 import { PLACEHOLDER_TIME } from "@/lib/formatReservation";
 import { maskGuestName } from "@/lib/maskGuestName";
-import { formatBoardPartyLabel } from "@/lib/partyCounts";
+import { formatBoardPartyLabel, getPartyTier, type PartyTier } from "@/lib/partyCounts";
 import {
   isPlaceholderReservation,
   isUnparsedDraft,
@@ -14,6 +14,7 @@ export interface BoardEntry {
   time: string;
   guestName: string;
   partySize: string;
+  partyTier: PartyTier;
   seat: string | null;
 }
 
@@ -23,7 +24,7 @@ export interface StatusBoardColumns {
 }
 
 const BOARD_TEAM_LIMIT = 20;
-const BOARD_COLUMN_SIZE = 10;
+export const BOARD_COLUMN_SIZE = 10;
 
 export function formatBoardTitle(date: Date): string {
   const dateLabel = format(date, "M월 d일", { locale: ko });
@@ -66,6 +67,7 @@ function toBoardEntry(reservation: Reservation): BoardEntry {
     time: formatBoardDisplayTime(reservation.time),
     guestName: formatBoardGuestName(reservation.guest_name),
     partySize: formatBoardPartyLabel(reservation),
+    partyTier: getPartyTier(reservation),
     seat: reservation.seat,
   };
 }
@@ -81,10 +83,4 @@ export function buildStatusBoard(reservations: Reservation[]): StatusBoardColumn
     left: entries.slice(0, BOARD_COLUMN_SIZE),
     right: entries.slice(BOARD_COLUMN_SIZE, BOARD_TEAM_LIMIT),
   };
-}
-
-export function formatBoardLine(entry: BoardEntry): string {
-  const parts = [entry.time, entry.guestName, entry.partySize];
-  if (entry.seat) parts.push(entry.seat);
-  return parts.join(" ");
 }

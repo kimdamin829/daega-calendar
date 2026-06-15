@@ -4,6 +4,8 @@ export interface PartyCounts {
   infant_count: number;
 }
 
+export type PartyTier = 1 | 2 | 3;
+
 export class PartyCountParseError extends Error {
   constructor(message: string) {
     super(message);
@@ -11,17 +13,7 @@ export class PartyCountParseError extends Error {
   }
 }
 
-export function getPartySize(counts: PartyCounts): number {
-  return counts.adult_count + counts.child_count + counts.infant_count;
-}
-
-export function toPartyCounts(partySize: number): PartyCounts {
-  return {
-    adult_count: Math.max(0, partySize),
-    child_count: 0,
-    infant_count: 0,
-  };
-}
+const PARTY_PARSE_HINT = "인원수 형식이 올바르지 않습니다. (예: 4, 4명, 10.2명, 10&1명)";
 
 export const DEFAULT_PARTY_COUNTS: PartyCounts = {
   adult_count: 1,
@@ -29,21 +21,31 @@ export const DEFAULT_PARTY_COUNTS: PartyCounts = {
   infant_count: 0,
 };
 
-/** 4 / 4명 / 10.2 / 10.2명 / 10.2.1명 → adult·child·infant */
+export function getPartySize(counts: PartyCounts): number {
+  return counts.adult_count + counts.child_count + counts.infant_count;
+}
+
+export function getPartyTier(counts: PartyCounts): PartyTier {
+  if (counts.infant_count > 0) return 3;
+  if (counts.child_count > 0) return 2;
+  return 1;
+}
+
+/** 4 / 4명 / 10.2 / 10&1 / 10.2.1명 → adult·child·infant */
 export function parsePartyCounts(raw: string): PartyCounts {
   const cleaned = raw.replace(/명$/, "").trim();
   if (!cleaned) {
-    throw new PartyCountParseError("인원수 형식이 올바르지 않습니다. (예: 4, 4명, 10.2명)");
+    throw new PartyCountParseError(PARTY_PARSE_HINT);
   }
 
-  const segments = cleaned.split(".");
+  const segments = cleaned.replace(/&/g, ".").split(".");
   if (segments.length > 3) {
-    throw new PartyCountParseError("인원수 형식이 올바르지 않습니다. (예: 4, 4명, 10.2명)");
+    throw new PartyCountParseError(PARTY_PARSE_HINT);
   }
 
   const numbers = segments.map((segment) => {
     if (!/^\d+$/.test(segment)) {
-      throw new PartyCountParseError("인원수 형식이 올바르지 않습니다. (예: 4, 4명, 10.2명)");
+      throw new PartyCountParseError(PARTY_PARSE_HINT);
     }
     return Number(segment);
   });
@@ -78,10 +80,11 @@ export function formatPartyLabel(counts: PartyCounts): string {
 
 /** 현황판용 — "명" 없이 성인·소인·유아를 &로 구분 (예: 10, 10&1, 10&2&1) */
 export function formatBoardPartyLabel(counts: PartyCounts): string {
-  if (counts.infant_count > 0) {
+  const tier = getPartyTier(counts);
+  if (tier === 3) {
     return `${counts.adult_count}&${counts.child_count}&${counts.infant_count}`;
   }
-  if (counts.child_count > 0) {
+  if (tier === 2) {
     return `${counts.adult_count}&${counts.child_count}`;
   }
   return String(counts.adult_count);
