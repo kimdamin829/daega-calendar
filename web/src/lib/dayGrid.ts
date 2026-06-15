@@ -4,10 +4,12 @@ export const DEFAULT_DURATION = 60;
 
 export const TIMELINE_START_HOUR = 9;
 export const TIMELINE_END_HOUR = 21;
+export const TIMELINE_PADDING_ROWS = 1;
 const TIMELINE_START_MINUTES = TIMELINE_START_HOUR * 60;
+const TIMELINE_MIN_MINUTES =
+  (TIMELINE_START_HOUR - TIMELINE_PADDING_ROWS) * 60;
 const TIMELINE_END_MINUTES = TIMELINE_END_HOUR * 60;
 export const TIMELINE_HOUR_COUNT = TIMELINE_END_HOUR - TIMELINE_START_HOUR;
-export const TIMELINE_PADDING_ROWS = 1;
 export const TIMELINE_CONTENT_OFFSET_Y = TIMELINE_PADDING_ROWS * HOUR_HEIGHT;
 export const GRID_HEIGHT =
   HOUR_HEIGHT * (TIMELINE_HOUR_COUNT + TIMELINE_PADDING_ROWS * 2);
@@ -22,7 +24,7 @@ export function offsetYToSnappedMinutes(offsetY: number): number {
 
 export function clampMinutes(minutes: number, duration: number): number {
   const maxStart = TIMELINE_END_MINUTES - duration;
-  return Math.max(TIMELINE_START_MINUTES, Math.min(snapMinutes(minutes), maxStart));
+  return Math.max(TIMELINE_MIN_MINUTES, Math.min(snapMinutes(minutes), maxStart));
 }
 
 export function minutesToY(minutes: number): number {

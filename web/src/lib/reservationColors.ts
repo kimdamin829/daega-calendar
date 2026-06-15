@@ -1,4 +1,4 @@
-export type ReservationColor = "sky" | "yellow" | "green" | "pink" | "purple";
+export type ReservationColor = "sky" | "yellow" | "green" | "pink" | "purple" | "gray";
 
 const SKY_BLOCK_STYLES = "border-sky-300 bg-sky-100 text-sky-950";
 
@@ -48,6 +48,13 @@ export const RESERVATION_COLORS: {
     swatch: "bg-purple-400",
     ring: "ring-purple-400",
   },
+  {
+    id: "gray",
+    label: "회색",
+    block: "border-gray-300 bg-gray-100 text-gray-950",
+    swatch: "bg-gray-400",
+    ring: "ring-gray-400",
+  },
 ];
 
 export function isDefaultColor(color: ReservationColor | null): boolean {
@@ -67,6 +74,7 @@ const MONTH_CHIP_BY_COLOR: Record<ReservationColor, string> = {
   green: "bg-green-100 text-green-950",
   pink: "bg-pink-100 text-pink-950",
   purple: "bg-purple-100 text-purple-950",
+  gray: "bg-gray-100 text-gray-950",
 };
 
 export function getMonthChipClass(color: ReservationColor | null): string {
