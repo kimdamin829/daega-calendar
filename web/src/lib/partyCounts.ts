@@ -75,3 +75,14 @@ export function formatPartyLabel(counts: PartyCounts): string {
 
   return `${parts.join(".")}명`;
 }
+
+/** 현황판용 — "명" 없이 성인·소인·유아를 &로 구분 (예: 10, 10&1, 10&2&1) */
+export function formatBoardPartyLabel(counts: PartyCounts): string {
+  if (counts.infant_count > 0) {
+    return `${counts.adult_count}&${counts.child_count}&${counts.infant_count}`;
+  }
+  if (counts.child_count > 0) {
+    return `${counts.adult_count}&${counts.child_count}`;
+  }
+  return String(counts.adult_count);
+}
