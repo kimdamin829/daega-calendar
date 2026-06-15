@@ -4,17 +4,37 @@ import {
   endOfMonth,
   endOfWeek,
   format,
-  isAfter,
   isSameDay,
   isSameMonth,
-  isToday,
   parseISO,
   setMonth,
-  startOfDay,
   startOfMonth,
   startOfWeek,
 } from "date-fns";
 import { ko } from "date-fns/locale";
+
+/** 식당 기준 시간대 — 예약 날짜·현황판·오늘 표시 */
+export const KOREA_TIMEZONE = "Asia/Seoul";
+
+/** 현재 시각 기준 한국 날짜 (yyyy-MM-dd) */
+export function getKoreaDateKey(reference: Date = new Date()): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: KOREA_TIMEZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(reference);
+}
+
+/** 한국 날짜 키 → 달력/제목 표시용 Date (해당 일자 로컬 자정) */
+export function koreaDateKeyToDate(dateKey: string): Date {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
+export function getKoreaTodayDate(): Date {
+  return koreaDateKeyToDate(getKoreaDateKey());
+}
 
 export function toDateString(date: Date): string {
   return format(date, "yyyy-MM-dd");
@@ -56,15 +76,15 @@ export function isCurrentMonth(day: Date, month: Date): boolean {
 }
 
 export function isTodayDate(day: Date): boolean {
-  return isToday(day);
+  return toDateString(day) === getKoreaDateKey();
 }
 
 export function isFutureDate(day: Date): boolean {
-  return isAfter(startOfDay(day), startOfDay(new Date()));
+  return toDateString(day) > getKoreaDateKey();
 }
 
 export function isTodayMonth(month: Date): boolean {
-  return isSameMonth(month, new Date());
+  return isSameMonth(month, getKoreaTodayDate());
 }
 
 export function isSameDate(a: Date, b: Date): boolean {

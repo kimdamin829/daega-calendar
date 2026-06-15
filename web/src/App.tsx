@@ -1,31 +1,49 @@
 import { useCallback, useEffect, useState } from "react";
 import { addDays, startOfMonth } from "date-fns";
+import { BoardView } from "@/components/BoardView";
 import { DayView } from "@/components/DayView";
 import { MonthCalendar } from "@/components/MonthCalendar";
 import { MonthPickerBar } from "@/components/MonthPickerBar";
 import { MonthViewHeader } from "@/components/MonthViewHeader";
 import { SetupNotice } from "@/components/SetupNotice";
+import { useBoardReservations } from "@/hooks/useBoardReservations";
 import { useReservations } from "@/hooks/useReservations";
-import { parseDateParam, syncMonthToDate, toDateString } from "@/lib/dateUtils";
+import { useKoreaToday } from "@/hooks/useTodayDate";
+import { getKoreaTodayDate, parseDateParam, syncMonthToDate, toDateString } from "@/lib/dateUtils";
 import { isSupabaseConfigured } from "@/lib/supabase";
 
-type ViewMode = "month" | "day";
+type ViewMode = "month" | "day" | "board";
 
 function getInitialSelectedDate(): Date {
   const params = new URLSearchParams(window.location.search);
-  return parseDateParam(params.get("date")) ?? new Date();
+  return parseDateParam(params.get("date")) ?? getKoreaTodayDate();
 }
 
 function getInitialView(): ViewMode {
   const params = new URLSearchParams(window.location.search);
-  return params.get("view") === "day" ? "day" : "month";
+  const view = params.get("view");
+  if (view === "day") return "day";
+  if (view === "board") return "board";
+  return "month";
 }
 
 function getInitialMonth(selectedDate: Date): Date {
   return startOfMonth(selectedDate);
 }
 
-export default function App() {
+function BoardApp() {
+  const { date, dateKey } = useKoreaToday();
+  const { board, error } = useBoardReservations(dateKey);
+
+  useEffect(() => {
+    const nextUrl = `${window.location.pathname}?view=board`;
+    window.history.replaceState(null, "", nextUrl);
+  }, []);
+
+  return <BoardView date={date} left={board.left} right={board.right} error={error} />;
+}
+
+function CalendarApp() {
   const [selectedDate, setSelectedDate] = useState<Date>(getInitialSelectedDate);
   const [month, setMonth] = useState<Date>(() => getInitialMonth(getInitialSelectedDate()));
   const [view, setView] = useState<ViewMode>(getInitialView);
@@ -86,10 +104,6 @@ export default function App() {
     if (nextMonth) setMonth(nextMonth);
   };
 
-  if (!isSupabaseConfigured) {
-    return <SetupNotice />;
-  }
-
   if (view === "day") {
     return (
       <DayView
@@ -125,4 +139,17 @@ export default function App() {
       )}
     </div>
   );
+}
+
+export default function App() {
+  if (!isSupabaseConfigured) {
+    return <SetupNotice />;
+  }
+
+  const initialView = getInitialView();
+  if (initialView === "board") {
+    return <BoardApp />;
+  }
+
+  return <CalendarApp />;
 }

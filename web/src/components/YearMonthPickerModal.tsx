@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { setMonth, setYear, startOfMonth } from "date-fns";
-import { formatShortMonth } from "@/lib/dateUtils";
+import { formatShortMonth, getKoreaTodayDate } from "@/lib/dateUtils";
 
 interface YearMonthPickerModalProps {
   open: boolean;
@@ -40,7 +40,7 @@ export function YearMonthPickerModal({
   };
 
   const handleToday = () => {
-    onSelect(startOfMonth(new Date()));
+    onSelect(startOfMonth(getKoreaTodayDate()));
     onClose();
   };
 

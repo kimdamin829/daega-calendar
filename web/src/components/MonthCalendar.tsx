@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import {
   getCalendarDays,
+  getKoreaTodayDate,
   isCurrentMonth,
   isSameDate,
   isTodayDate,
@@ -30,7 +31,7 @@ export function MonthCalendar({
   onDateSelect,
 }: MonthCalendarProps) {
   const days = getCalendarDays(month);
-  const todayWeekday = new Date().getDay();
+  const todayWeekday = getKoreaTodayDate().getDay();
   const showReservationPreviews = isTodayMonth(month);
   const monthRef = useRef(month);
   monthRef.current = month;

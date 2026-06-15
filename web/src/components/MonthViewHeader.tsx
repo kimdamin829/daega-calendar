@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { formatMonthTitle } from "@/lib/dateUtils";
+import { formatMonthTitle, getKoreaTodayDate } from "@/lib/dateUtils";
 import { YearMonthPickerModal } from "@/components/YearMonthPickerModal";
 
 interface MonthViewHeaderProps {
@@ -36,7 +36,7 @@ function TodayCalendarIcon({ day }: { day: number }) {
 
 export function MonthViewHeader({ month, onMonthChange }: MonthViewHeaderProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const today = new Date();
+  const today = getKoreaTodayDate();
 
   return (
     <>

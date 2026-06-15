@@ -7,6 +7,14 @@ function inferHour24(hour: number): number {
   return hour;
 }
 
+/** 현황판 표시용 — 1~9시는 13:00~21:00 형식 */
+export function formatBoardDisplayTime(time: string): string {
+  const [hourStr, minuteStr] = time.split(":");
+  const hour24 = inferHour24(Number(hourStr) || 0);
+  const minute = Number(minuteStr) || 0;
+  return `${hour24}:${String(minute).padStart(2, "0")}`;
+}
+
 /** 저장된 time 문자열을 실제 시각(분)으로 해석 — 표시 형식과 무관하게 점심/저녁·타임라인에 사용 */
 export function resolveTimeToMinutes(time: string): number {
   const [hours, minutes] = time.split(":").map(Number);
