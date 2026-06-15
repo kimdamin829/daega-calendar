@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import type { Reservation } from "@/types/reservation";
-import { PLACEHOLDER_TIME } from "@/lib/formatReservation";
+import { PLACEHOLDER_TIME } from "@/lib/reservationConstants";
 import { maskGuestName } from "@/lib/maskGuestName";
 import { formatBoardPartyLabel, getPartyTier, type PartyTier } from "@/lib/partyCounts";
 import {
@@ -18,7 +18,7 @@ export interface BoardEntry {
   seat: string | null;
 }
 
-export interface StatusBoardColumns {
+interface StatusBoardColumns {
   left: BoardEntry[];
   right: BoardEntry[];
 }
@@ -32,7 +32,7 @@ export function formatBoardTitle(date: Date): string {
   return `${dateLabel}(${weekday}) 예약 현황`;
 }
 
-export function isEligibleForBoard(reservation: Reservation): boolean {
+function isEligibleForBoard(reservation: Reservation): boolean {
   if (reservation.color === "gray") return false;
   if (isPlaceholderReservation(reservation)) return false;
   if (isUnparsedDraft(reservation)) return false;
@@ -40,7 +40,7 @@ export function isEligibleForBoard(reservation: Reservation): boolean {
   return true;
 }
 
-export function compareBoardReservations(a: Reservation, b: Reservation): number {
+function compareBoardReservations(a: Reservation, b: Reservation): number {
   const timeDiff = resolveTimeToMinutes(a.time) - resolveTimeToMinutes(b.time);
   if (timeDiff !== 0) return timeDiff;
 

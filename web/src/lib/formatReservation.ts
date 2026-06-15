@@ -1,8 +1,8 @@
 import type { PartyCounts } from "@/lib/partyCounts";
 import { formatPartyLabel, shouldShowPartyLabel } from "@/lib/partyCounts";
+import { PLACEHOLDER_TIME } from "@/lib/reservationConstants";
 
-/** 타임라인에서 새 블록 생성 시 time 컬럼용 — 실제 예약 시간과 무관 */
-export const PLACEHOLDER_TIME = "00:00:00";
+export { PLACEHOLDER_TIME } from "@/lib/reservationConstants";
 
 export function formatTime(time: string): string {
   const [hourStr, minuteStr] = time.split(":");
@@ -14,6 +14,21 @@ export function formatTime(time: string): string {
 
 function hasRealTime(time: string): boolean {
   return time !== PLACEHOLDER_TIME;
+}
+
+export function formatPartialReservationLine(
+  reservation: PartyCounts & { time: string },
+): string {
+  const parts: string[] = [];
+
+  if (hasRealTime(reservation.time)) {
+    parts.push(formatTime(reservation.time));
+  }
+  if (shouldShowPartyLabel(reservation)) {
+    parts.push(formatPartyLabel(reservation));
+  }
+
+  return parts.join(" ");
 }
 
 export function formatReservationLine(

@@ -1,8 +1,11 @@
-import { formatReservationLine, formatTime, PLACEHOLDER_TIME } from "@/lib/formatReservation";
-import { formatPartyLabel, shouldShowPartyLabel } from "@/lib/partyCounts";
+import {
+  formatPartialReservationLine,
+  formatReservationLine,
+} from "@/lib/formatReservation";
+import { PLACEHOLDER_GUEST, PLACEHOLDER_TIME } from "@/lib/reservationConstants";
 
 export function isPlaceholderReservation(reservation: { guest_name: string }): boolean {
-  return !reservation.guest_name || reservation.guest_name === "새 예약";
+  return !reservation.guest_name || reservation.guest_name === PLACEHOLDER_GUEST;
 }
 
 /** 형식 오류로 memo에 통째로 저장된 미파싱 입력 */
@@ -35,23 +38,7 @@ export function shouldShowOnDayTimeline(
   return false;
 }
 
-function formatPartialReservationLine(reservation: {
-  time: string;
-  adult_count: number;
-  child_count: number;
-  infant_count: number;
-}): string {
-  const parts: string[] = [];
-  if (reservation.time !== PLACEHOLDER_TIME) {
-    parts.push(formatTime(reservation.time));
-  }
-  if (shouldShowPartyLabel(reservation)) {
-    parts.push(formatPartyLabel(reservation));
-  }
-  return parts.join(" ");
-}
-
-function formatReservationDisplay(reservation: {
+export function formatReservationDisplay(reservation: {
   time: string;
   adult_count: number;
   child_count: number;
@@ -68,5 +55,3 @@ function formatReservationDisplay(reservation: {
   }
   return formatReservationLine(reservation);
 }
-
-export { formatReservationDisplay };

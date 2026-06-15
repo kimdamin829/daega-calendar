@@ -1,6 +1,6 @@
 import type { Reservation } from "@/types/reservation";
 import type { ReservationColor } from "@/lib/reservationColors";
-import { PLACEHOLDER_TIME } from "@/lib/formatReservation";
+import { PLACEHOLDER_TIME } from "@/lib/reservationConstants";
 import {
   formatReservationDisplay,
   isPlaceholderReservation,
@@ -8,7 +8,7 @@ import {
 } from "@/lib/reservationDisplay";
 import { resolveTimeToMinutes } from "@/lib/timeResolve";
 
-export interface MonthPreview {
+interface MonthPreview {
   label: string;
   color: ReservationColor | null;
 }

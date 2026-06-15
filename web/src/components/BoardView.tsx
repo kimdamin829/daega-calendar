@@ -5,7 +5,7 @@ import { BOARD_COLUMN_SIZE, formatBoardTitle, type BoardEntry } from "@/lib/stat
 const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
 const BOARD_BG = "#f0ebf8";
-const BOARD_TEXT = "font-bold text-[#3c4043]";
+const BOARD_TEXT = "font-bold tabular-nums text-[#1a1a1a]";
 
 const COL_TIME = 170;
 const COL_NAME = 300;
@@ -29,19 +29,17 @@ function seatTextClass(length: number): string {
 }
 
 function BoardSeat({ seat }: { seat: string | null }) {
-  if (!seat) {
-    return <span className="min-w-0 flex-1 shrink" />;
-  }
+  const label = seat?.trim() || "-";
 
   return (
     <span
       className={[
         "min-w-0 flex-1 shrink whitespace-normal break-all text-right",
         BOARD_TEXT,
-        seatTextClass(seat.length),
+        seatTextClass(label.length),
       ].join(" ")}
     >
-      {seat}
+      {label}
     </span>
   );
 }
@@ -130,10 +128,20 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
         </header>
 
         <div className="mx-8 mb-10 flex min-h-0 flex-1 flex-col">
-          <div className="flex min-h-0 min-w-0 flex-1 overflow-hidden rounded-[32px] border border-[#ddd6f3] bg-white shadow-md">
-            <BoardColumn entries={left} />
-            <div className="w-[2px] shrink-0 flex-none self-stretch bg-[#e4e6ea]" />
-            <BoardColumn entries={right} />
+          <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden rounded-[32px] bg-white shadow-md">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-no-repeat opacity-25"
+              style={{
+                backgroundImage: "url(/reservation-bg.png)",
+                backgroundSize: "100% 100%",
+              }}
+            />
+            <div className="relative z-10 flex min-h-0 min-w-0 flex-1">
+              <BoardColumn entries={left} />
+              <div className="w-[2px] shrink-0 flex-none self-stretch bg-[#e4e6ea]" />
+              <BoardColumn entries={right} />
+            </div>
           </div>
 
           {error && (

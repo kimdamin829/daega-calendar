@@ -9,44 +9,33 @@ import { SetupNotice } from "@/components/SetupNotice";
 import { useBoardReservations } from "@/hooks/useBoardReservations";
 import { useReservations } from "@/hooks/useReservations";
 import { useKoreaToday } from "@/hooks/useTodayDate";
-import { getKoreaTodayDate, parseDateParam, syncMonthToDate, toDateString } from "@/lib/dateUtils";
+import { parseDateParam, syncMonthToDate } from "@/lib/dateUtils";
 import { isSupabaseConfigured } from "@/lib/supabase";
-
-type ViewMode = "month" | "day" | "board";
-
-function getInitialSelectedDate(): Date {
-  const params = new URLSearchParams(window.location.search);
-  return parseDateParam(params.get("date")) ?? getKoreaTodayDate();
-}
-
-function getInitialView(): ViewMode {
-  const params = new URLSearchParams(window.location.search);
-  const view = params.get("view");
-  if (view === "day") return "day";
-  if (view === "board") return "board";
-  return "month";
-}
-
-function getInitialMonth(selectedDate: Date): Date {
-  return startOfMonth(selectedDate);
-}
+import {
+  readUrlState,
+  syncBoardUrl,
+  syncCalendarUrl,
+  type ViewMode,
+} from "@/lib/urlState";
 
 function BoardApp() {
   const { date, dateKey } = useKoreaToday();
   const { board, error } = useBoardReservations(dateKey);
 
   useEffect(() => {
-    const nextUrl = `${window.location.pathname}?view=board`;
-    window.history.replaceState(null, "", nextUrl);
+    syncBoardUrl();
   }, []);
 
   return <BoardView date={date} left={board.left} right={board.right} error={error} />;
 }
 
-function CalendarApp() {
-  const [selectedDate, setSelectedDate] = useState<Date>(getInitialSelectedDate);
-  const [month, setMonth] = useState<Date>(() => getInitialMonth(getInitialSelectedDate()));
-  const [view, setView] = useState<ViewMode>(getInitialView);
+function CalendarApp({ initialSelectedDate, initialView }: {
+  initialSelectedDate: Date;
+  initialView: ViewMode;
+}) {
+  const [selectedDate, setSelectedDate] = useState(initialSelectedDate);
+  const [month, setMonth] = useState(() => startOfMonth(initialSelectedDate));
+  const [view, setView] = useState<ViewMode>(initialView);
 
   const {
     dayReservations,
@@ -79,15 +68,7 @@ function CalendarApp() {
   }, [applyNavigation]);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    params.set("date", toDateString(selectedDate));
-    if (view === "day") {
-      params.set("view", "day");
-    } else {
-      params.delete("view");
-    }
-    const nextUrl = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState(null, "", nextUrl);
+    syncCalendarUrl(selectedDate, view);
   }, [selectedDate, view]);
 
   const handleDateSelect = (date: Date) => {
@@ -146,10 +127,10 @@ export default function App() {
     return <SetupNotice />;
   }
 
-  const initialView = getInitialView();
-  if (initialView === "board") {
+  const { selectedDate, view } = readUrlState();
+  if (view === "board") {
     return <BoardApp />;
   }
 
-  return <CalendarApp />;
+  return <CalendarApp initialSelectedDate={selectedDate} initialView={view} />;
 }

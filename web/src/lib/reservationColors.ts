@@ -2,7 +2,7 @@ export type ReservationColor = "sky" | "yellow" | "green" | "pink" | "purple" | 
 
 const SKY_BLOCK_STYLES = "border-sky-300 bg-sky-100 text-sky-950";
 
-export const DEFAULT_BLOCK_STYLES = {
+const DEFAULT_BLOCK_STYLES = {
   block: SKY_BLOCK_STYLES,
 };
 

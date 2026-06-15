@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo } from "react";
 import { endOfMonth, startOfMonth } from "date-fns";
 import type { Reservation } from "@/types/reservation";
 import { PLACEHOLDER_TIME } from "@/lib/formatReservation";
@@ -7,10 +7,8 @@ import type { ReservationColor } from "@/lib/reservationColors";
 import {
   createReservation,
   deleteReservation,
-  fetchReservationsInRange,
   updateReservation,
 } from "@/lib/supabase";
-import { subscribeReservations } from "@/lib/realtime";
 import { toDateString } from "@/lib/dateUtils";
 import { parseReservationInput, ParseError } from "@/lib/parseReservation";
 import { DEFAULT_PARTY_COUNTS } from "@/lib/partyCounts";
@@ -19,45 +17,30 @@ import {
   summarizeReservationsByDate,
   type DaySummary,
 } from "@/lib/monthSummary";
+import { useReservationLoader } from "@/hooks/useReservationLoader";
 
 export function useReservations(month: Date, selectedDate: Date) {
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const requestIdRef = useRef(0);
-
   const monthStart = toDateString(startOfMonth(month));
   const monthEnd = toDateString(endOfMonth(month));
   const selectedDateKey = toDateString(selectedDate);
 
-  const load = useCallback(async () => {
-    const requestId = ++requestIdRef.current;
-    setError(null);
-
-    try {
-      const data = await fetchReservationsInRange(monthStart, monthEnd);
-      if (requestId !== requestIdRef.current) return;
-
-      const orphans = data.filter(isOrphanPlaceholder);
-      if (orphans.length > 0) {
-        await Promise.all(
-          orphans.map((reservation) =>
-            deleteReservation(reservation.id).catch(() => undefined),
-          ),
-        );
-      }
-
-      setReservations(data.filter((reservation) => !isOrphanPlaceholder(reservation)));
-    } catch (err) {
-      if (requestId !== requestIdRef.current) return;
-      setError(err instanceof Error ? err.message : "예약 데이터를 불러오지 못했습니다.");
+  const processLoaded = useCallback(async (data: Reservation[]) => {
+    const orphans = data.filter(isOrphanPlaceholder);
+    if (orphans.length > 0) {
+      await Promise.all(
+        orphans.map((reservation) =>
+          deleteReservation(reservation.id).catch(() => undefined),
+        ),
+      );
     }
-  }, [monthStart, monthEnd]);
+    return data.filter((reservation) => !isOrphanPlaceholder(reservation));
+  }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
-
-  useEffect(() => subscribeReservations(() => void load()), [load]);
+  const { reservations, setReservations, error, load } = useReservationLoader(
+    monthStart,
+    monthEnd,
+    processLoaded,
+  );
 
   const daySummaries = useMemo(
     () => summarizeReservationsByDate(reservations),
@@ -85,7 +68,7 @@ export function useReservations(month: Date, selectedDate: Date) {
         ),
       );
     },
-    [],
+    [setReservations],
   );
 
   const saveReservationContent = useCallback(
@@ -149,7 +132,7 @@ export function useReservations(month: Date, selectedDate: Date) {
         replaceDraft(await createReservation({ date: selectedDateKey, ...payload }));
       }
     },
-    [selectedDateKey, patchReservation, reservations],
+    [selectedDateKey, patchReservation, reservations, setReservations],
   );
 
   const updatePosition = useCallback(
@@ -194,14 +177,13 @@ export function useReservations(month: Date, selectedDate: Date) {
         await load();
       }
     },
-    [load],
+    [load, setReservations],
   );
 
   return {
     dayReservations,
     getDaySummary,
     error,
-    reload: load,
     saveReservationContent,
     updatePosition,
     updateColor,

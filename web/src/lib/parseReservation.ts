@@ -50,7 +50,7 @@ export function parseReservationInput(raw: string, date: string): ReservationCon
 
   if (parts.length < 2) {
     throw new ParseError(
-      "형식: 시간 인원 [이름] [좌석] [메모…]\n예: 7:00 4명 김다민, 7:00 10.2명 김다민",
+      "형식: 시간 인원 [이름] [좌석] [메모…]\n예: 7:00 4명 김다민, 7:00 10.2명 김다민, 7:00 10.2,1명 김다민",
     );
   }
 
