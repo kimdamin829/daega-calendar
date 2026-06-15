@@ -16,21 +16,6 @@ function hasRealTime(time: string): boolean {
   return time !== PLACEHOLDER_TIME;
 }
 
-export function formatPartialReservationLine(
-  reservation: PartyCounts & { time: string },
-): string {
-  const parts: string[] = [];
-
-  if (hasRealTime(reservation.time)) {
-    parts.push(formatTime(reservation.time));
-  }
-  if (shouldShowPartyLabel(reservation)) {
-    parts.push(formatPartyLabel(reservation));
-  }
-
-  return parts.join(" ");
-}
-
 export function formatReservationLine(
   reservation: PartyCounts & {
     time: string;

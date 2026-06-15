@@ -1,7 +1,5 @@
-import {
-  formatPartialReservationLine,
-  formatReservationLine,
-} from "@/lib/formatReservation";
+import { formatReservationLine, formatTime } from "@/lib/formatReservation";
+import { formatPartyLabel, shouldShowPartyLabel } from "@/lib/partyCounts";
 import { PLACEHOLDER_GUEST, PLACEHOLDER_TIME } from "@/lib/reservationConstants";
 
 export function isPlaceholderReservation(reservation: { guest_name: string }): boolean {
@@ -36,6 +34,24 @@ export function shouldShowOnDayTimeline(
   if (!isPlaceholderReservation(reservation)) return true;
   if (reservation.time !== PLACEHOLDER_TIME) return true;
   return false;
+}
+
+function formatPartialReservationLine(reservation: {
+  time: string;
+  adult_count: number;
+  child_count: number;
+  infant_count: number;
+}): string {
+  const parts: string[] = [];
+
+  if (reservation.time !== PLACEHOLDER_TIME) {
+    parts.push(formatTime(reservation.time));
+  }
+  if (shouldShowPartyLabel(reservation)) {
+    parts.push(formatPartyLabel(reservation));
+  }
+
+  return parts.join(" ");
 }
 
 export function formatReservationDisplay(reservation: {

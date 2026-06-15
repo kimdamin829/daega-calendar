@@ -160,7 +160,7 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
           }}
           onBlur={handleInputBlur}
           onPointerDown={(event) => event.stopPropagation()}
-          placeholder="7:00 4명 김다민 r3"
+          placeholder="7:00 4명 김다민 VIP1"
           disabled={busy}
           className="w-full rounded-xl border border-gcal-border px-4 py-4 text-base outline-none focus:border-gcal-blue focus:ring-2 focus:ring-gcal-blue/20"
         />

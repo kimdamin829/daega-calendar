@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { formatMonthTitle, getKoreaTodayDate } from "@/lib/dateUtils";
+import { formatMonthTitle, koreaDateKeyToDate } from "@/lib/dateUtils";
 import { YearMonthPickerModal } from "@/components/YearMonthPickerModal";
 
 interface MonthViewHeaderProps {
   month: Date;
+  todayKey: string;
   onMonthChange: (month: Date) => void;
 }
 
@@ -34,9 +35,9 @@ function TodayCalendarIcon({ day }: { day: number }) {
   );
 }
 
-export function MonthViewHeader({ month, onMonthChange }: MonthViewHeaderProps) {
+export function MonthViewHeader({ month, todayKey, onMonthChange }: MonthViewHeaderProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
-  const today = getKoreaTodayDate();
+  const todayDay = koreaDateKeyToDate(todayKey).getDate();
 
   return (
     <>
@@ -50,7 +51,7 @@ export function MonthViewHeader({ month, onMonthChange }: MonthViewHeaderProps) 
             className="flex h-12 w-12 items-center justify-center rounded-full hover:bg-[#f1f3f4]"
             aria-label="년월 선택"
           >
-            <TodayCalendarIcon day={today.getDate()} />
+            <TodayCalendarIcon day={todayDay} />
           </button>
         </div>
       </header>

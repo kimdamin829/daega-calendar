@@ -33,6 +33,8 @@ function CalendarApp({ initialSelectedDate, initialView }: {
   initialSelectedDate: Date;
   initialView: ViewMode;
 }) {
+  const { dateKey: koreaTodayKey } = useKoreaToday();
+
   const [selectedDate, setSelectedDate] = useState(initialSelectedDate);
   const [month, setMonth] = useState(() => startOfMonth(initialSelectedDate));
   const [view, setView] = useState<ViewMode>(initialView);
@@ -104,12 +106,13 @@ function CalendarApp({ initialSelectedDate, initialView }: {
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
-      <MonthViewHeader month={month} onMonthChange={setMonth} />
+      <MonthViewHeader month={month} todayKey={koreaTodayKey} onMonthChange={setMonth} />
       <MonthPickerBar month={month} onMonthChange={setMonth} />
 
       <MonthCalendar
         month={month}
         selectedDate={selectedDate}
+        todayKey={koreaTodayKey}
         getDaySummary={getDaySummary}
         onMonthChange={setMonth}
         onDateSelect={handleDateSelect}

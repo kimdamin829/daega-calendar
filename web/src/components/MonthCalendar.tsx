@@ -1,11 +1,10 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
+import { isSameMonth } from "date-fns";
 import {
   getCalendarDays,
-  getKoreaTodayDate,
   isCurrentMonth,
   isSameDate,
-  isTodayDate,
-  isTodayMonth,
+  koreaDateKeyToDate,
   shiftMonth,
   toDateString,
   WEEKDAY_LABELS,
@@ -18,6 +17,7 @@ import { useMonthGridPreviewLimit } from "@/hooks/useMonthGridPreviewLimit";
 interface MonthCalendarProps {
   month: Date;
   selectedDate: Date | null;
+  todayKey: string;
   getDaySummary: (dateKey: string) => DaySummary;
   onMonthChange: (month: Date) => void;
   onDateSelect: (date: Date) => void;
@@ -26,13 +26,15 @@ interface MonthCalendarProps {
 export function MonthCalendar({
   month,
   selectedDate,
+  todayKey,
   getDaySummary,
   onMonthChange,
   onDateSelect,
 }: MonthCalendarProps) {
   const days = getCalendarDays(month);
-  const todayWeekday = getKoreaTodayDate().getDay();
-  const showReservationPreviews = isTodayMonth(month);
+  const todayDate = useMemo(() => koreaDateKeyToDate(todayKey), [todayKey]);
+  const todayWeekday = todayDate.getDay();
+  const showReservationPreviews = isSameMonth(month, todayDate);
   const monthRef = useRef(month);
   monthRef.current = month;
 
@@ -82,7 +84,7 @@ export function MonthCalendar({
                 key={dateKey}
                 day={day}
                 isCurrentMonth={isCurrentMonth(day, month)}
-                isToday={isTodayDate(day)}
+                isToday={dateKey === todayKey}
                 isSelected={selectedDate ? isSameDate(day, selectedDate) : false}
                 showReservations={showReservationPreviews}
                 maxPreviewLines={maxPreviewLines}

@@ -6,9 +6,10 @@ const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
 const BOARD_BG = "#f0ebf8";
 const BOARD_TEXT = "font-bold tabular-nums text-[#1a1a1a]";
+const TIME_CELL = `text-[52px] leading-none ${BOARD_TEXT} tracking-tight`;
 
-const COL_TIME = 170;
-const COL_NAME = 300;
+const COL_TIME = 180;
+const COL_NAME = 290;
 const COL_PARTY = 220;
 
 const PARTY_TEXT: Record<PartyTier, string> = {
@@ -54,7 +55,7 @@ function BoardRow({ entry }: { entry: BoardEntry | null }) {
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 items-center overflow-hidden px-8">
-      <span className={`${cellClass} shrink-0 truncate`} style={{ width: COL_TIME }}>
+      <span className={`${TIME_CELL} shrink-0 truncate`} style={{ width: COL_TIME }}>
         {entry.time}
       </span>
       <span
