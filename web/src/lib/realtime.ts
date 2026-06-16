@@ -1,4 +1,3 @@
-import { notifyAndroidWidgetRefresh } from "@/lib/widgetBridge";
 import { supabase } from "@/lib/supabase";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
@@ -7,14 +6,21 @@ type Listener = () => void;
 const listeners = new Set<Listener>();
 let channel: RealtimeChannel | null = null;
 let notifyTimer: ReturnType<typeof setTimeout> | null = null;
+let lastLocalMutationAt = 0;
+
+const LOCAL_MUTATION_GUARD_MS = 800;
+
+export function markLocalReservationMutation() {
+  lastLocalMutationAt = Date.now();
+}
 
 function notifyListeners() {
   if (notifyTimer !== null) clearTimeout(notifyTimer);
 
   notifyTimer = setTimeout(() => {
     notifyTimer = null;
+    if (Date.now() - lastLocalMutationAt < LOCAL_MUTATION_GUARD_MS) return;
     listeners.forEach((listener) => listener());
-    notifyAndroidWidgetRefresh();
   }, 80);
 }
 

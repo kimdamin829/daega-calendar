@@ -3,7 +3,6 @@ import type { ReservationColor } from "@/lib/reservationColors";
 import { PLACEHOLDER_TIME } from "@/lib/reservationConstants";
 import {
   formatReservationDisplay,
-  isPlaceholderReservation,
   isUnparsedDraft,
 } from "@/lib/reservationDisplay";
 import { compareReservationsByTime } from "@/lib/reservationSort";
@@ -19,12 +18,12 @@ export interface DaySummary {
 
 export const EMPTY_DAY_SUMMARY: DaySummary = { previews: [] };
 
+function shouldShowInMonthPreview(reservation: Reservation): boolean {
+  return isUnparsedDraft(reservation) || reservation.time !== PLACEHOLDER_TIME;
+}
+
 function buildMonthPreviews(reservations: Reservation[]): MonthPreview[] {
-  const valid = reservations.filter(
-    (reservation) =>
-      isUnparsedDraft(reservation) ||
-      (!isPlaceholderReservation(reservation) && reservation.time !== PLACEHOLDER_TIME),
-  );
+  const valid = reservations.filter(shouldShowInMonthPreview);
 
   return [...valid].sort(compareReservationsByTime).map((reservation) => ({
     label: formatReservationDisplay(reservation),

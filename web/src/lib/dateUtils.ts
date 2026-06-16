@@ -36,8 +36,9 @@ export function getKoreaTodayDate(): Date {
   return koreaDateKeyToDate(getKoreaDateKey());
 }
 
+/** yyyy-MM-dd — 식당 기준 한국 날짜 */
 export function toDateString(date: Date): string {
-  return format(date, "yyyy-MM-dd");
+  return getKoreaDateKey(date);
 }
 
 export function formatMonthTitle(date: Date): string {
@@ -76,11 +77,11 @@ export function isCurrentMonth(day: Date, month: Date): boolean {
 }
 
 export function isTodayDate(day: Date): boolean {
-  return toDateString(day) === getKoreaDateKey();
+  return getKoreaDateKey(day) === getKoreaDateKey();
 }
 
 export function isFutureDate(day: Date): boolean {
-  return toDateString(day) > getKoreaDateKey();
+  return getKoreaDateKey(day) > getKoreaDateKey();
 }
 
 export function isTodayMonth(month: Date): boolean {

@@ -18,7 +18,10 @@ type ReservationContentPayload = {
   color: ReservationColor | null;
 };
 
-function buildPayload(draft: Reservation, content: Omit<ReservationContentPayload, "start_minutes" | "duration_minutes" | "color">): ReservationContentPayload {
+function buildPayload(
+  draft: Reservation,
+  content: Omit<ReservationContentPayload, "start_minutes" | "duration_minutes" | "color">,
+): ReservationContentPayload {
   return {
     ...content,
     start_minutes: draft.start_minutes,
@@ -39,6 +42,41 @@ async function persistPayload(
   }
 
   return createReservation({ date: dateKey, ...payload });
+}
+
+/** DB 저장 전 월별뷰·위젯에 바로 반영할 낙관적 예약 */
+export function previewReservationContentFromRaw(
+  draft: Reservation,
+  raw: string,
+  dateKey: string,
+  existing: Reservation | undefined,
+): Reservation {
+  const base = existing ?? draft;
+
+  try {
+    const parsed = parseReservationInput(raw, dateKey);
+    const payload = buildPayload(draft, {
+      time: parsed.time,
+      adult_count: parsed.adult_count,
+      child_count: parsed.child_count,
+      infant_count: parsed.infant_count,
+      guest_name: parsed.guest_name,
+      seat: parsed.seat,
+      memo: parsed.memo,
+    });
+    return { ...base, ...payload, date: dateKey };
+  } catch (err) {
+    if (!(err instanceof ParseError)) throw err;
+
+    const payload = buildPayload(draft, {
+      time: PLACEHOLDER_TIME,
+      ...DEFAULT_PARTY_COUNTS,
+      guest_name: "",
+      seat: null,
+      memo: raw.trim(),
+    });
+    return { ...base, ...payload, date: dateKey };
+  }
 }
 
 export async function saveReservationContentToDb(

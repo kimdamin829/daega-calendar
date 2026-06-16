@@ -1,18 +1,24 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { endOfMonth, startOfMonth } from "date-fns";
 import type { Reservation } from "@/types/reservation";
 import type { ReservationColor } from "@/lib/reservationColors";
-import { toDateString } from "@/lib/dateUtils";
+import { getKoreaDateKey } from "@/lib/dateUtils";
 import { compareReservationsByTime } from "@/lib/reservationSort";
 import { withoutOrphanPlaceholders } from "@/lib/reservationCleanup";
-import { saveReservationContentToDb } from "@/lib/saveReservationContent";
+import { saveReservationContentToDb, previewReservationContentFromRaw } from "@/lib/saveReservationContent";
 import {
   EMPTY_DAY_SUMMARY,
   summarizeReservationsByDate,
   type DaySummary,
 } from "@/lib/monthSummary";
 import { deleteReservation, updateReservation } from "@/lib/supabase";
+import { markLocalReservationMutation } from "@/lib/realtime";
+import { pushWidgetMonthSummaries } from "@/lib/widgetBridge";
 import { useReservationLoader } from "@/hooks/useReservationLoader";
+
+function notifyWidgetAfterLocalChange() {
+  markLocalReservationMutation();
+}
 
 function replaceDraftInList(
   prev: Reservation[],
@@ -25,9 +31,9 @@ function replaceDraftInList(
 }
 
 export function useReservations(month: Date, selectedDate: Date) {
-  const monthStart = toDateString(startOfMonth(month));
-  const monthEnd = toDateString(endOfMonth(month));
-  const selectedDateKey = toDateString(selectedDate);
+  const monthStart = getKoreaDateKey(startOfMonth(month));
+  const monthEnd = getKoreaDateKey(endOfMonth(month));
+  const selectedDateKey = getKoreaDateKey(selectedDate);
 
   const { reservations, setReservations, error, load } = useReservationLoader(
     monthStart,
@@ -44,6 +50,10 @@ export function useReservations(month: Date, selectedDate: Date) {
     () => summarizeReservationsByDate(reservations),
     [reservations],
   );
+
+  useEffect(() => {
+    pushWidgetMonthSummaries(month, daySummaries);
+  }, [month, daySummaries]);
 
   const dayReservations = useMemo(
     () =>
@@ -76,6 +86,15 @@ export function useReservations(month: Date, selectedDate: Date) {
 
       const promise = (async () => {
         const existing = reservationsRef.current.find((reservation) => reservation.id === draft.id);
+        const optimistic = previewReservationContentFromRaw(
+          draft,
+          raw,
+          selectedDateKey,
+          existing,
+        );
+        setReservations((prev) => replaceDraftInList(prev, draft.id, optimistic));
+        notifyWidgetAfterLocalChange();
+
         const saved = await saveReservationContentToDb(
           draft,
           raw,
@@ -83,6 +102,7 @@ export function useReservations(month: Date, selectedDate: Date) {
           existing,
         );
         setReservations((prev) => replaceDraftInList(prev, draft.id, saved));
+        notifyWidgetAfterLocalChange();
       })();
 
       inflightSavesRef.current.set(draft.id, promise);
@@ -94,7 +114,7 @@ export function useReservations(month: Date, selectedDate: Date) {
 
       return promise;
     },
-    [selectedDateKey, setReservations],
+    [selectedDateKey, setReservations, load],
   );
 
   const updatePosition = useCallback(
@@ -103,6 +123,7 @@ export function useReservations(month: Date, selectedDate: Date) {
         start_minutes: startMinutes,
         duration_minutes: durationMinutes,
       });
+      notifyWidgetAfterLocalChange();
 
       try {
         await updateReservation(id, {
@@ -119,6 +140,7 @@ export function useReservations(month: Date, selectedDate: Date) {
   const updateColor = useCallback(
     async (id: string, color: ReservationColor | null) => {
       patchReservation(id, { color });
+      notifyWidgetAfterLocalChange();
 
       try {
         await updateReservation(id, { color });
@@ -132,6 +154,7 @@ export function useReservations(month: Date, selectedDate: Date) {
   const remove = useCallback(
     async (id: string) => {
       setReservations((prev) => prev.filter((reservation) => reservation.id !== id));
+      notifyWidgetAfterLocalChange();
 
       try {
         await deleteReservation(id);

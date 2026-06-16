@@ -1,12 +1,11 @@
 import { useMemo, useRef } from "react";
-import { isSameMonth } from "date-fns";
 import {
   getCalendarDays,
+  getKoreaDateKey,
   isCurrentMonth,
   isSameDate,
   koreaDateKeyToDate,
   shiftMonth,
-  toDateString,
   WEEKDAY_LABELS,
 } from "@/lib/dateUtils";
 import { type DaySummary } from "@/lib/monthSummary";
@@ -32,9 +31,6 @@ export function MonthCalendar({
   onDateSelect,
 }: MonthCalendarProps) {
   const days = getCalendarDays(month);
-  const todayDate = useMemo(() => koreaDateKeyToDate(todayKey), [todayKey]);
-  const todayWeekday = todayDate.getDay();
-  const showReservationPreviews = isSameMonth(month, todayDate);
   const monthRef = useRef(month);
   monthRef.current = month;
 
@@ -44,10 +40,8 @@ export function MonthCalendar({
   });
 
   const weekCount = Math.ceil(days.length / 7);
-  const { gridRef, maxPreviewLines } = useMonthGridPreviewLimit(
-    weekCount,
-    showReservationPreviews,
-  );
+  const todayWeekday = useMemo(() => koreaDateKeyToDate(todayKey).getDay(), [todayKey]);
+  const { gridRef, maxPreviewLines } = useMonthGridPreviewLimit(weekCount, true);
 
   return (
     <section className="flex min-h-0 flex-1 flex-col px-0 pb-2">
@@ -77,19 +71,19 @@ export function MonthCalendar({
           style={{ gridTemplateRows: `repeat(${weekCount}, minmax(0, 1fr))` }}
         >
           {days.map((day) => {
-            const dateKey = toDateString(day);
+            const dateKey = getKoreaDateKey(day);
 
             return (
               <DayCell
                 key={dateKey}
-                day={day}
+                dateKey={dateKey}
+                dayOfMonth={day.getDate()}
                 isCurrentMonth={isCurrentMonth(day, month)}
                 isToday={dateKey === todayKey}
                 isSelected={selectedDate ? isSameDate(day, selectedDate) : false}
-                showReservations={showReservationPreviews}
                 maxPreviewLines={maxPreviewLines}
                 summary={getDaySummary(dateKey)}
-                onSelect={onDateSelect}
+                onSelect={() => onDateSelect(day)}
               />
             );
           })}

@@ -1,38 +1,33 @@
-import { isFutureDate, toDateString } from "@/lib/dateUtils";
 import { type DaySummary } from "@/lib/monthSummary";
 import { getMonthChipClass } from "@/lib/reservationColors";
 
 interface DayCellProps {
-  day: Date;
+  dateKey: string;
+  dayOfMonth: number;
   isCurrentMonth: boolean;
   isToday: boolean;
   isSelected: boolean;
-  showReservations: boolean;
   maxPreviewLines: number;
   summary: DaySummary;
-  onSelect: (day: Date) => void;
+  onSelect: () => void;
 }
 
 export function DayCell({
-  day,
+  dateKey,
+  dayOfMonth,
   isCurrentMonth,
   isToday,
   isSelected,
-  showReservations: showReservationsForMonth,
   maxPreviewLines,
   summary,
   onSelect,
 }: DayCellProps) {
-  const dayNumber = day.getDate();
-  const showPreviews = showReservationsForMonth && !isFutureDate(day);
-  const visiblePreviews = showPreviews
-    ? summary.previews.slice(0, maxPreviewLines)
-    : [];
+  const previews = isCurrentMonth ? summary.previews.slice(0, maxPreviewLines) : [];
 
   return (
     <button
       type="button"
-      onClick={() => onSelect(day)}
+      onClick={onSelect}
       className={[
         "flex h-full min-h-0 w-full min-w-0 flex-col overflow-hidden border-r-gcal-grid border-b-gcal-grid pt-1 pb-1 text-left transition-colors sm:min-h-[64px]",
         isSelected && !isToday ? "bg-gcal-blue-light" : "",
@@ -40,7 +35,7 @@ export function DayCell({
       ]
         .filter(Boolean)
         .join(" ")}
-      aria-label={`${toDateString(day)} 선택`}
+      aria-label={`${dateKey} 선택`}
       aria-pressed={isSelected}
     >
       <div className="flex shrink-0 justify-center">
@@ -53,13 +48,13 @@ export function DayCell({
             .filter(Boolean)
             .join(" ")}
         >
-          {dayNumber}
+          {dayOfMonth}
         </span>
       </div>
 
-      {visiblePreviews.length > 0 && (
+      {previews.length > 0 && (
         <div className="mt-0.5 flex min-h-0 flex-1 flex-col gap-0.5 overflow-hidden">
-          {visiblePreviews.map((preview, index) => (
+          {previews.map((preview, index) => (
             <p
               key={`${preview.label}-${index}`}
               className={[
