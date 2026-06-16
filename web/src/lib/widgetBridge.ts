@@ -13,6 +13,11 @@ declare global {
       refreshWidget(): void;
       pushMonthSummaries(json: string): void;
     };
+    __bridgeDebugState?: {
+      available: boolean;
+      lastReason: string;
+      updatedAt: number;
+    };
   }
 }
 
@@ -70,7 +75,19 @@ export function pushWidgetMonthSummaries(
 ): void {
   try {
     const bridge = window.DaegaCalendarAndroid;
-    if (!bridge) return;
+    if (!bridge) {
+      window.__bridgeDebugState = {
+        available: false,
+        lastReason: `push:missing-bridge:${options?.reason ?? "-"}`,
+        updatedAt: Date.now(),
+      };
+      return;
+    }
+    window.__bridgeDebugState = {
+      available: true,
+      lastReason: `push:start:${options?.reason ?? "-"}`,
+      updatedAt: Date.now(),
+    };
 
     const days = serializeDays(daySummaries);
     const merge = options?.merge ?? false;
@@ -97,16 +114,37 @@ export function pushWidgetMonthSummaries(
         days,
       }),
     );
+    window.__bridgeDebugState = {
+      available: true,
+      lastReason: `push:sent:${options?.reason ?? "-"}`,
+      updatedAt: Date.now(),
+    };
   } catch {
     // WebView 브릿지 없음
+    window.__bridgeDebugState = {
+      available: false,
+      lastReason: `push:exception:${options?.reason ?? "-"}`,
+      updatedAt: Date.now(),
+    };
   }
 }
 
 export function debugWidgetBridge(reason: string): void {
   try {
-    window.DaegaCalendarAndroid?.debugLog(reason);
+    const bridge = window.DaegaCalendarAndroid;
+    window.__bridgeDebugState = {
+      available: Boolean(bridge),
+      lastReason: `debug:${reason}`,
+      updatedAt: Date.now(),
+    };
+    bridge?.debugLog(reason);
   } catch {
     // WebView 브릿지 없음
+    window.__bridgeDebugState = {
+      available: false,
+      lastReason: `debug:exception:${reason}`,
+      updatedAt: Date.now(),
+    };
   }
 }
 
