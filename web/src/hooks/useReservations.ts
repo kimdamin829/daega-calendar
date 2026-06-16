@@ -47,8 +47,9 @@ export function useReservations(month: Date, selectedDate: Date) {
   reservationsRef.current = reservations;
 
   const inflightSavesRef = useRef(new Map<string, Promise<void>>());
-  const hasSentInitialMountPushRef = useRef(false);
+  const lastMountPushAtRef = useRef(0);
   const blockMountPushUntilRef = useRef(0);
+  const MOUNT_PUSH_THROTTLE_MS = 10_000;
 
   const pushWidgetNow = useCallback((nextReservations: Reservation[], reason: string, focusDate?: string) => {
     if (
@@ -97,10 +98,10 @@ export function useReservations(month: Date, selectedDate: Date) {
   // 서버 로드·realtime 후 위젯 동기화 (로드 전 빈 push 금지)
   useEffect(() => {
     if (!hasLoaded) return;
-    if (hasSentInitialMountPushRef.current) return;
     if (Date.now() < blockMountPushUntilRef.current) return;
+    if (Date.now() - lastMountPushAtRef.current < MOUNT_PUSH_THROTTLE_MS) return;
     syncWidgetFromReservations(month, reservations, { allowEmpty: true, reason: "mount" });
-    hasSentInitialMountPushRef.current = true;
+    lastMountPushAtRef.current = Date.now();
   }, [hasLoaded, month, reservations]);
 
   const dayReservations = useMemo(
