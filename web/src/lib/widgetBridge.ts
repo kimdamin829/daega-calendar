@@ -83,6 +83,8 @@ export function pushWidgetMonthSummaries(
         days,
       }),
     );
+    // JS bridge push가 누락되는 기기에서 네트워크 동기화를 보조로 트리거
+    bridge.refreshWidget();
   } catch {
     // WebView 브릿지 없음
   }
