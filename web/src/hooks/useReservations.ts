@@ -48,6 +48,8 @@ export function useReservations(month: Date, selectedDate: Date) {
   reservationsRef.current = reservations;
 
   const inflightSavesRef = useRef(new Map<string, Promise<void>>());
+  const hasSentInitialMountPushRef = useRef(false);
+  const blockMountPushUntilRef = useRef(0);
 
   const pushWidgetNow = useCallback((nextReservations: Reservation[], reason: string, focusDate?: string) => {
     const summary = summarizeReservationsByDate(nextReservations);
@@ -56,6 +58,14 @@ export function useReservations(month: Date, selectedDate: Date) {
     console.log(
       `[widget-sync] reason=${reason} reservations=${nextReservations.length} summaryKeys=${keys.length} focusDate=${focusDate ?? "-"} hasFocus=${focusDate ? keys.includes(focusDate) : "-"}`,
     );
+    if (
+      reason.startsWith("delete:") ||
+      reason.startsWith("save:") ||
+      reason.startsWith("position:") ||
+      reason.startsWith("color:")
+    ) {
+      blockMountPushUntilRef.current = Date.now() + 3_000;
+    }
     syncWidgetFromReservations(monthRef.current, nextReservations, {
       allowEmpty: true,
       focusDate,
@@ -94,8 +104,14 @@ export function useReservations(month: Date, selectedDate: Date) {
   // 서버 로드·realtime 후 위젯 동기화 (로드 전 빈 push 금지)
   useEffect(() => {
     if (!hasLoaded) return;
+    if (hasSentInitialMountPushRef.current) return;
+    if (Date.now() < blockMountPushUntilRef.current) {
+      console.log("[widget-sync] mount push ignored by recent user action");
+      return;
+    }
     debugWidgetBridge("mount");
     syncWidgetFromReservations(month, reservations, { allowEmpty: true, reason: "mount" });
+    hasSentInitialMountPushRef.current = true;
   }, [hasLoaded, month, reservations]);
 
   const dayReservations = useMemo(
