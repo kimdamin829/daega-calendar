@@ -9,6 +9,7 @@ import {
 declare global {
   interface Window {
     DaegaCalendarAndroid?: {
+      debugLog(reason: string): void;
       refreshWidget(): void;
       pushMonthSummaries(json: string): void;
     };
@@ -20,7 +21,14 @@ export type WidgetPushOptions = {
   merge?: boolean;
   /** true면 예약 0건인 달도 위젯 캐시를 비움 (로드 완료 후에만) */
   allowEmpty?: boolean;
+  /** 디버그용: 방금 저장한 날짜 */
+  focusDate?: string;
+  /** 디버그용: push 호출 이유 */
+  reason?: string;
 };
+
+const REFRESH_DEBOUNCE_MS = 250;
+let refreshTimer: ReturnType<typeof setTimeout> | null = null;
 
 function monthPartsFromDate(viewMonth: Date): { year: number; month: number } {
   const monthKey = getKoreaDateKey(startOfMonth(viewMonth));
@@ -67,24 +75,51 @@ export function pushWidgetMonthSummaries(
     const days = serializeDays(daySummaries);
     const merge = options?.merge ?? false;
     const allowEmpty = options?.allowEmpty ?? false;
+    const { year, month } = monthPartsFromDate(viewMonth);
+    const payloadKeys = Object.keys(days).sort();
+    console.log(
+      `[widget-push] reason=${options?.reason ?? "-"} month=${year}-${month} keys=${payloadKeys.length} focusDate=${options?.focusDate ?? "-"} hasFocus=${options?.focusDate ? payloadKeys.includes(options.focusDate) : "-"}`,
+    );
 
     // 로드 전 빈 push가 위젯 캐시를 막아버리는 것 방지
     if (!merge && !allowEmpty && Object.keys(days).length === 0) {
       return;
     }
 
-    const { year, month } = monthPartsFromDate(viewMonth);
+    bridge.debugLog(`push:before:${options?.reason ?? "-"}`);
     bridge.pushMonthSummaries(
       JSON.stringify({
         year,
         month,
         merge,
         allowEmpty,
+        reason: options?.reason ?? "",
         days,
       }),
     );
-    // JS bridge push가 누락되는 기기에서 네트워크 동기화를 보조로 트리거
-    bridge.refreshWidget();
+  } catch {
+    // WebView 브릿지 없음
+  }
+}
+
+export function debugWidgetBridge(reason: string): void {
+  try {
+    window.DaegaCalendarAndroid?.debugLog(reason);
+  } catch {
+    // WebView 브릿지 없음
+  }
+}
+
+/** 저장 성공 후 보정용 Supabase 재조회 트리거 (즉시 push 이후) */
+export function refreshWidgetInBackground(): void {
+  try {
+    const bridge = window.DaegaCalendarAndroid;
+    if (!bridge) return;
+    if (refreshTimer !== null) clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(() => {
+      refreshTimer = null;
+      bridge.refreshWidget();
+    }, REFRESH_DEBOUNCE_MS);
   } catch {
     // WebView 브릿지 없음
   }

@@ -13,7 +13,11 @@ import {
 } from "@/lib/monthSummary";
 import { deleteReservation, updateReservation } from "@/lib/supabase";
 import { markLocalReservationMutation } from "@/lib/realtime";
-import { syncWidgetFromReservations } from "@/lib/widgetBridge";
+import {
+  debugWidgetBridge,
+  refreshWidgetInBackground,
+  syncWidgetFromReservations,
+} from "@/lib/widgetBridge";
 import { useReservationLoader } from "@/hooks/useReservationLoader";
 
 function replaceDraftInList(
@@ -45,16 +49,37 @@ export function useReservations(month: Date, selectedDate: Date) {
 
   const inflightSavesRef = useRef(new Map<string, Promise<void>>());
 
-  const pushWidgetNow = useCallback((nextReservations: Reservation[]) => {
-    syncWidgetFromReservations(monthRef.current, nextReservations, { allowEmpty: true });
+  const pushWidgetNow = useCallback((nextReservations: Reservation[], reason: string, focusDate?: string) => {
+    const summary = summarizeReservationsByDate(nextReservations);
+    const keys = [...summary.keys()].sort();
+    // 저장 액션 직후 실제 전달되는 데이터 검증용 로그
+    console.log(
+      `[widget-sync] reason=${reason} reservations=${nextReservations.length} summaryKeys=${keys.length} focusDate=${focusDate ?? "-"} hasFocus=${focusDate ? keys.includes(focusDate) : "-"}`,
+    );
+    syncWidgetFromReservations(monthRef.current, nextReservations, {
+      allowEmpty: true,
+      focusDate,
+      reason,
+    });
   }, []);
 
+  const setAndPushNow = useCallback(
+    (nextReservations: Reservation[], reason: string, focusDate?: string) => {
+      markLocalReservationMutation();
+      reservationsRef.current = nextReservations;
+      setReservations(nextReservations);
+      pushWidgetNow(nextReservations, reason, focusDate);
+    },
+    [pushWidgetNow, setReservations],
+  );
+
   const applyLocalChange = useCallback(
-    (updater: (prev: Reservation[]) => Reservation[]) => {
+    (updater: (prev: Reservation[]) => Reservation[], reason: string, focusDate?: string) => {
       markLocalReservationMutation();
       setReservations((prev) => {
         const next = updater(prev);
-        pushWidgetNow(next);
+        reservationsRef.current = next;
+        pushWidgetNow(next, reason, focusDate);
         return next;
       });
     },
@@ -69,7 +94,8 @@ export function useReservations(month: Date, selectedDate: Date) {
   // 서버 로드·realtime 후 위젯 동기화 (로드 전 빈 push 금지)
   useEffect(() => {
     if (!hasLoaded) return;
-    syncWidgetFromReservations(month, reservations, { allowEmpty: true });
+    debugWidgetBridge("mount");
+    syncWidgetFromReservations(month, reservations, { allowEmpty: true, reason: "mount" });
   }, [hasLoaded, month, reservations]);
 
   const dayReservations = useMemo(
@@ -98,7 +124,7 @@ export function useReservations(month: Date, selectedDate: Date) {
           selectedDateKey,
           existing,
         );
-        applyLocalChange((prev) => replaceDraftInList(prev, draft.id, optimistic));
+        applyLocalChange((prev) => replaceDraftInList(prev, draft.id, optimistic), "save:optimistic", selectedDateKey);
 
         const saved = await saveReservationContentToDb(
           draft,
@@ -106,7 +132,11 @@ export function useReservations(month: Date, selectedDate: Date) {
           selectedDateKey,
           existing,
         );
-        applyLocalChange((prev) => replaceDraftInList(prev, draft.id, saved));
+        const base = reservationsRef.current;
+        const nextAfterSave = replaceDraftInList(base, draft.id, saved);
+        debugWidgetBridge("save:success");
+        setAndPushNow(nextAfterSave, "save:success", saved.date);
+        refreshWidgetInBackground();
       })();
 
       inflightSavesRef.current.set(draft.id, promise);
@@ -118,7 +148,7 @@ export function useReservations(month: Date, selectedDate: Date) {
 
       return promise;
     },
-    [applyLocalChange, selectedDateKey],
+    [applyLocalChange, selectedDateKey, setAndPushNow],
   );
 
   const updatePosition = useCallback(
@@ -129,18 +159,25 @@ export function useReservations(month: Date, selectedDate: Date) {
             ? { ...reservation, start_minutes: startMinutes, duration_minutes: durationMinutes }
             : reservation,
         ),
-      );
+      "position:optimistic");
 
       try {
-        await updateReservation(id, {
+        const updated = await updateReservation(id, {
           start_minutes: startMinutes,
           duration_minutes: durationMinutes,
         });
+        const base = reservationsRef.current;
+        const nextAfterSave = base.map((reservation) =>
+          reservation.id === id ? { ...reservation, ...updated } : reservation,
+        );
+        debugWidgetBridge("update:position:success");
+        setAndPushNow(nextAfterSave, "position:success", updated.date);
+        refreshWidgetInBackground();
       } catch {
         await load();
       }
     },
-    [applyLocalChange, load],
+    [applyLocalChange, load, setAndPushNow],
   );
 
   const updateColor = useCallback(
@@ -149,28 +186,40 @@ export function useReservations(month: Date, selectedDate: Date) {
         prev.map((reservation) =>
           reservation.id === id ? { ...reservation, color } : reservation,
         ),
-      );
+      "color:optimistic");
 
       try {
-        await updateReservation(id, { color });
+        const updated = await updateReservation(id, { color });
+        const base = reservationsRef.current;
+        const nextAfterSave = base.map((reservation) =>
+          reservation.id === id ? { ...reservation, ...updated } : reservation,
+        );
+        debugWidgetBridge("update:color:success");
+        setAndPushNow(nextAfterSave, "color:success", updated.date);
+        refreshWidgetInBackground();
       } catch {
         await load();
       }
     },
-    [applyLocalChange, load],
+    [applyLocalChange, load, setAndPushNow],
   );
 
   const remove = useCallback(
     async (id: string) => {
-      applyLocalChange((prev) => prev.filter((reservation) => reservation.id !== id));
+      const target = reservationsRef.current.find((reservation) => reservation.id === id);
+      applyLocalChange((prev) => prev.filter((reservation) => reservation.id !== id), "delete:optimistic", target?.date);
 
       try {
         await deleteReservation(id);
+        const nextAfterDelete = reservationsRef.current.filter((reservation) => reservation.id !== id);
+        debugWidgetBridge("delete:success");
+        setAndPushNow(nextAfterDelete, "delete:success", target?.date);
+        refreshWidgetInBackground();
       } catch {
         await load();
       }
     },
-    [applyLocalChange, load],
+    [applyLocalChange, load, setAndPushNow],
   );
 
   return {
