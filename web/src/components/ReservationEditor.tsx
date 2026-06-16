@@ -1,6 +1,7 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { Reservation } from "@/types/reservation";
 import { isPlaceholderReservation } from "@/lib/reservationDisplay";
+import { debugWidgetBridge } from "@/lib/widgetBridge";
 import {
   COLOR_SWATCHES,
   isDefaultColor,
@@ -66,6 +67,7 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
         if (trimmed) {
           await onSave(trimmed);
         } else if (isPlaceholderReservation(reservation)) {
+          debugWidgetBridge("delete:clicked:dismiss-empty");
           await onDelete();
         }
       } catch (err) {
@@ -80,6 +82,7 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
 
     const handleDelete = async () => {
       if (busy) return;
+      debugWidgetBridge("delete:clicked:editor");
       setBusy(true);
       try {
         await onDelete();
