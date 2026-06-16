@@ -41,8 +41,8 @@ export function MonthViewHeader({ month, todayKey, onMonthChange }: MonthViewHea
 
   return (
     <>
-      <header className="bg-white">
-        <div className="flex items-center justify-between px-4 py-3">
+      <header className="bg-white pt-screen-header">
+        <div className="flex items-center justify-between px-4 pb-1.5 pt-1">
           <h1 className="text-[22px] font-normal text-[#3c4043]">{formatMonthTitle(month)}</h1>
 
           <button

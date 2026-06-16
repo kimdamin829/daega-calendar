@@ -44,6 +44,7 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
         input.focus({ preventScroll: true });
         const end = input.value.length;
         input.setSelectionRange(end, end);
+        input.scrollIntoView({ block: "nearest", inline: "nearest" });
       };
 
       const frame = window.requestAnimationFrame(focusInput);

@@ -1,3 +1,4 @@
+import { notifyAndroidWidgetRefresh } from "@/lib/widgetBridge";
 import { supabase } from "@/lib/supabase";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
@@ -13,6 +14,7 @@ function notifyListeners() {
   notifyTimer = setTimeout(() => {
     notifyTimer = null;
     listeners.forEach((listener) => listener());
+    notifyAndroidWidgetRefresh();
   }, 80);
 }
 

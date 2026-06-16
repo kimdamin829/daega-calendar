@@ -32,6 +32,10 @@
   border-left-width: 0.5px;
 }
 
+@utility pt-screen-header {
+  padding-top: calc(env(safe-area-inset-top, 0px) + 14px);
+}
+
 body {
   margin: 0;
   font-family:

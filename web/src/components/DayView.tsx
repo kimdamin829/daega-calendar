@@ -33,6 +33,7 @@ import {
 } from "@/lib/dayGrid";
 import { layoutReservations } from "@/lib/overlapLayout";
 import { compareReservationsByTime } from "@/lib/reservationSort";
+import { useVisualViewportLayout } from "@/lib/viewportHeight";
 
 interface DayViewProps {
   date: Date;
@@ -153,6 +154,8 @@ export function DayView({
     if (pending?.id === editingId) return pending;
     return reservations.find((r) => r.id === editingId) ?? null;
   }, [editingId, pending, reservations]);
+
+  const editorViewport = useVisualViewportLayout(Boolean(editingReservation));
 
   useEffect(() => {
     if (!editingId) {
@@ -599,7 +602,7 @@ export function DayView({
       onPointerUpCapture={handleRootPointerUpCapture}
       onPointerCancel={daySwipe.onPointerCancel}
     >
-      <header className="flex shrink-0 items-center gap-2 border-b border-gcal-border px-3 py-3">
+      <header className="flex shrink-0 items-center gap-2 border-b border-gcal-border px-3 pb-3 pt-screen-header">
         <button
           type="button"
           onClick={() => void handleBack()}
@@ -752,7 +755,11 @@ export function DayView({
           />
           <div
             ref={editorPanelRef}
-            className="fixed inset-x-0 bottom-0 z-50 max-h-[min(85dvh,520px)] overflow-y-auto border-t border-gcal-border bg-white px-4 pt-5 pb-[max(2.5rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.12)]"
+            className="fixed inset-x-0 z-50 overflow-y-auto border-t border-gcal-border bg-white px-4 pt-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(0,0,0,0.12)]"
+            style={{
+              bottom: editorViewport.bottomInset,
+              maxHeight: Math.min(editorViewport.height * 0.85, 520),
+            }}
             onPointerDown={(event) => event.stopPropagation()}
             onPointerUp={(event) => event.stopPropagation()}
           >

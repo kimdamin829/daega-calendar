@@ -59,7 +59,7 @@ export function MonthPickerBar({ month, onMonthChange }: MonthPickerBarProps) {
   return (
     <div
       ref={scrollRef}
-      className="flex gap-2 overflow-x-auto px-3 pb-3 pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="flex gap-2 overflow-x-auto px-3 pb-3 pt-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
     >
       {months.map((item) => {
         const selected = isSameMonth(item, month);
