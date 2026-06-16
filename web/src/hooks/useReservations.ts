@@ -13,12 +13,8 @@ import {
 } from "@/lib/monthSummary";
 import { deleteReservation, updateReservation } from "@/lib/supabase";
 import { markLocalReservationMutation } from "@/lib/realtime";
-import { pushWidgetMonthSummaries } from "@/lib/widgetBridge";
+import { syncWidgetFromReservations } from "@/lib/widgetBridge";
 import { useReservationLoader } from "@/hooks/useReservationLoader";
-
-function notifyWidgetAfterLocalChange() {
-  markLocalReservationMutation();
-}
 
 function replaceDraftInList(
   prev: Reservation[],
@@ -35,6 +31,9 @@ export function useReservations(month: Date, selectedDate: Date) {
   const monthEnd = getKoreaDateKey(endOfMonth(month));
   const selectedDateKey = getKoreaDateKey(selectedDate);
 
+  const monthRef = useRef(month);
+  monthRef.current = month;
+
   const { reservations, setReservations, error, load } = useReservationLoader(
     monthStart,
     monthEnd,
@@ -46,14 +45,31 @@ export function useReservations(month: Date, selectedDate: Date) {
 
   const inflightSavesRef = useRef(new Map<string, Promise<void>>());
 
+  const pushWidgetNow = useCallback((nextReservations: Reservation[]) => {
+    syncWidgetFromReservations(monthRef.current, nextReservations);
+  }, []);
+
+  const applyLocalChange = useCallback(
+    (updater: (prev: Reservation[]) => Reservation[]) => {
+      markLocalReservationMutation();
+      setReservations((prev) => {
+        const next = updater(prev);
+        pushWidgetNow(next);
+        return next;
+      });
+    },
+    [pushWidgetNow, setReservations],
+  );
+
   const daySummaries = useMemo(
     () => summarizeReservationsByDate(reservations),
     [reservations],
   );
 
+  // 서버 로드·realtime 동기화 후에도 위젯 맞춤
   useEffect(() => {
-    pushWidgetMonthSummaries(month, daySummaries);
-  }, [month, daySummaries]);
+    syncWidgetFromReservations(month, reservations);
+  }, [month, reservations]);
 
   const dayReservations = useMemo(
     () =>
@@ -66,17 +82,6 @@ export function useReservations(month: Date, selectedDate: Date) {
   const getDaySummary = useCallback(
     (dateKey: string): DaySummary => daySummaries.get(dateKey) ?? EMPTY_DAY_SUMMARY,
     [daySummaries],
-  );
-
-  const patchReservation = useCallback(
-    (id: string, patch: Partial<Reservation>) => {
-      setReservations((prev) =>
-        prev.map((reservation) =>
-          reservation.id === id ? { ...reservation, ...patch } : reservation,
-        ),
-      );
-    },
-    [setReservations],
   );
 
   const saveReservationContent = useCallback(
@@ -92,8 +97,7 @@ export function useReservations(month: Date, selectedDate: Date) {
           selectedDateKey,
           existing,
         );
-        setReservations((prev) => replaceDraftInList(prev, draft.id, optimistic));
-        notifyWidgetAfterLocalChange();
+        applyLocalChange((prev) => replaceDraftInList(prev, draft.id, optimistic));
 
         const saved = await saveReservationContentToDb(
           draft,
@@ -101,8 +105,7 @@ export function useReservations(month: Date, selectedDate: Date) {
           selectedDateKey,
           existing,
         );
-        setReservations((prev) => replaceDraftInList(prev, draft.id, saved));
-        notifyWidgetAfterLocalChange();
+        applyLocalChange((prev) => replaceDraftInList(prev, draft.id, saved));
       })();
 
       inflightSavesRef.current.set(draft.id, promise);
@@ -114,16 +117,18 @@ export function useReservations(month: Date, selectedDate: Date) {
 
       return promise;
     },
-    [selectedDateKey, setReservations, load],
+    [applyLocalChange, selectedDateKey],
   );
 
   const updatePosition = useCallback(
     async (id: string, startMinutes: number, durationMinutes: number) => {
-      patchReservation(id, {
-        start_minutes: startMinutes,
-        duration_minutes: durationMinutes,
-      });
-      notifyWidgetAfterLocalChange();
+      applyLocalChange((prev) =>
+        prev.map((reservation) =>
+          reservation.id === id
+            ? { ...reservation, start_minutes: startMinutes, duration_minutes: durationMinutes }
+            : reservation,
+        ),
+      );
 
       try {
         await updateReservation(id, {
@@ -134,13 +139,16 @@ export function useReservations(month: Date, selectedDate: Date) {
         await load();
       }
     },
-    [patchReservation, load],
+    [applyLocalChange, load],
   );
 
   const updateColor = useCallback(
     async (id: string, color: ReservationColor | null) => {
-      patchReservation(id, { color });
-      notifyWidgetAfterLocalChange();
+      applyLocalChange((prev) =>
+        prev.map((reservation) =>
+          reservation.id === id ? { ...reservation, color } : reservation,
+        ),
+      );
 
       try {
         await updateReservation(id, { color });
@@ -148,13 +156,12 @@ export function useReservations(month: Date, selectedDate: Date) {
         await load();
       }
     },
-    [patchReservation, load],
+    [applyLocalChange, load],
   );
 
   const remove = useCallback(
     async (id: string) => {
-      setReservations((prev) => prev.filter((reservation) => reservation.id !== id));
-      notifyWidgetAfterLocalChange();
+      applyLocalChange((prev) => prev.filter((reservation) => reservation.id !== id));
 
       try {
         await deleteReservation(id);
@@ -162,7 +169,7 @@ export function useReservations(month: Date, selectedDate: Date) {
         await load();
       }
     },
-    [load, setReservations],
+    [applyLocalChange, load],
   );
 
   return {
