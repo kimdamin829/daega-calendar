@@ -1,22 +1,31 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import type { PartyTier } from "@/lib/partyCounts";
 import { BOARD_COLUMN_SIZE, formatBoardTitle, type BoardEntry } from "@/lib/statusBoard";
 
 const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
-const BOARD_BG = "#f0ebf8";
-const BOARD_TEXT = "font-bold tabular-nums text-[#1a1a1a]";
-const TIME_CELL = `text-[52px] leading-none ${BOARD_TEXT} tracking-tight`;
+const BG_OPACITY = 0.16;
 
-const COL_TIME = 180;
-const COL_NAME = 290;
-const COL_PARTY = 220;
+const CREAM = "#f8f4ee";
+const BROWN = "#4a3428";
+const HEADER_BG = "#ebe3d6";
+const FRAME_BORDER = "#c4a882";
+
+const GRID_COLS =
+  "grid-cols-[minmax(0,0.9fr)_minmax(0,1.5fr)_minmax(0,1.25fr)_minmax(0,1.15fr)]";
+const BOARD_FONT = "font-extrabold";
+const ROW_CLASS = `grid ${GRID_COLS} min-h-[78px] items-center px-10 text-center`;
+const COLUMN_CLASS = "min-w-0 flex-1";
+const SUFFIX_TEXT = `text-[32px] ${BOARD_FONT}`;
+const TABLE_BODY_CLASS = "divide-y divide-[#f0ebe3]";
 
 const PARTY_TEXT: Record<PartyTier, string> = {
-  1: "text-[52px] leading-none",
-  2: "text-[49px] leading-none",
-  3: "text-[44px] leading-none",
+  1: "text-[42px]",
+  2: "text-[39px]",
+  3: "text-[36px]",
 };
+
+const HEADER_LABELS = ["시간", "고객명", "인원", "좌석"] as const;
 
 interface BoardViewProps {
   date: Date;
@@ -25,70 +34,170 @@ interface BoardViewProps {
   error: string | null;
 }
 
-function seatTextClass(length: number): string {
-  return length > 6 ? "text-[40px] leading-tight" : "text-[48px] leading-none";
-}
-
-function BoardSeat({ seat }: { seat: string | null }) {
-  const label = seat?.trim() || "-";
-
-  return (
-    <span
-      className={[
-        "min-w-0 flex-1 shrink whitespace-normal break-all text-right",
-        BOARD_TEXT,
-        seatTextClass(label.length),
-      ].join(" ")}
-    >
-      {label}
-    </span>
-  );
-}
-
-function BoardRow({ entry }: { entry: BoardEntry | null }) {
-  const cellClass = `text-[52px] leading-none ${BOARD_TEXT}`;
-  const suffixClass = `text-[38px] leading-none ${BOARD_TEXT}`;
-
-  if (!entry) {
-    return <div className="min-h-0 flex-1 px-8" />;
+function getRowIndices(isSplit: boolean, entryCount: number): number[] {
+  if (isSplit) {
+    return Array.from({ length: BOARD_COLUMN_SIZE }, (_, index) => index);
   }
+  return entryCount > 0 ? Array.from({ length: entryCount }, (_, index) => index) : [0];
+}
 
+function TitleDivider() {
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 items-center overflow-hidden px-8">
-      <span className={`${TIME_CELL} shrink-0 truncate`} style={{ width: COL_TIME }}>
-        {entry.time}
-      </span>
-      <span
-        className={`${cellClass} flex shrink-0 min-w-0 items-baseline`}
-        style={{ width: COL_NAME }}
-      >
-        <span>{entry.guestName}</span>
-        <span className={`${suffixClass} shrink-0`}>님</span>
-      </span>
-      <span
-        className={`flex shrink-0 items-baseline ${BOARD_TEXT}`}
-        style={{ width: COL_PARTY }}
-      >
-        <span className={PARTY_TEXT[entry.partyTier]}>{entry.partySize}</span>
-        <span className={suffixClass}>명</span>
-      </span>
-      <BoardSeat seat={entry.seat} />
+    <div className="flex shrink-0 items-center justify-center px-32 pb-8">
+      <div className="h-px flex-1" style={{ backgroundColor: FRAME_BORDER }} />
+      <div
+        className="mx-4 h-2 w-2 rotate-45"
+        style={{ backgroundColor: FRAME_BORDER }}
+      />
+      <div className="h-px flex-1" style={{ backgroundColor: FRAME_BORDER }} />
     </div>
   );
 }
 
-function BoardColumn({ entries }: { entries: BoardEntry[] }) {
+function BoardTableBackground({ centered }: { centered: boolean }) {
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col overflow-hidden py-6">
-      {Array.from({ length: BOARD_COLUMN_SIZE }, (_, index) => (
-        <BoardRow key={index} entry={entries[index] ?? null} />
+    <>
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-white" />
+      <img
+        src="/reservation-bg.png"
+        alt=""
+        aria-hidden
+        className={`pointer-events-none absolute inset-0 h-full w-full object-cover ${centered ? "object-center" : "object-right"}`}
+        style={{ opacity: BG_OPACITY }}
+      />
+    </>
+  );
+}
+
+function BoardTableHeader({ className = "" }: { className?: string }) {
+  return (
+    <div
+      className={`grid ${GRID_COLS} px-10 py-4 text-center text-[32px] ${BOARD_FONT} tracking-wide ${className}`}
+      style={{ backgroundColor: HEADER_BG, color: BROWN }}
+    >
+      {HEADER_LABELS.map((label) => (
+        <span key={label}>{label}</span>
       ))}
     </div>
   );
 }
 
-export function BoardView({ date, left, right, error }: BoardViewProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+function BoardSplitDivider() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute top-0 bottom-0 left-1/2 w-[2px] -translate-x-1/2"
+      style={{ backgroundColor: FRAME_BORDER }}
+    />
+  );
+}
+
+function BoardPartyLabel({ partySize, partyTier }: { partySize: string; partyTier: PartyTier }) {
+  const parts = partySize.split("&");
+
+  return (
+    <span className={BOARD_FONT}>
+      {parts.map((part, index) => (
+        <span key={index}>
+          {index > 0 && <span className={SUFFIX_TEXT}>&</span>}
+          <span className={PARTY_TEXT[partyTier]}>{part}</span>
+        </span>
+      ))}
+      <span className={SUFFIX_TEXT}>명</span>
+    </span>
+  );
+}
+
+function BoardTableRow({
+  entry,
+  className = "",
+}: {
+  entry: BoardEntry | null;
+  className?: string;
+}) {
+  if (!entry) {
+    return <div className={`${ROW_CLASS} ${className}`} />;
+  }
+
+  const seatLabel = entry.seat?.trim() || "-";
+  const seatSize = seatLabel.length > 6 ? "text-[34px]" : "text-[40px]";
+
+  return (
+    <div className={`${ROW_CLASS} ${className}`} style={{ color: BROWN }}>
+      <span className={`text-[40px] ${BOARD_FONT} tabular-nums`}>{entry.time}</span>
+      <span className={`text-[40px] ${BOARD_FONT}`}>
+        {entry.guestName}
+        <span className={SUFFIX_TEXT}>님</span>
+      </span>
+      <BoardPartyLabel partySize={entry.partySize} partyTier={entry.partyTier} />
+      <span className={`${seatSize} ${BOARD_FONT} break-all`}>{seatLabel}</span>
+    </div>
+  );
+}
+
+function BoardTableBody({
+  left,
+  right,
+  isSplit,
+}: {
+  left: BoardEntry[];
+  right: BoardEntry[];
+  isSplit: boolean;
+}) {
+  const rowIndices = getRowIndices(isSplit, left.length);
+
+  return (
+    <div className={TABLE_BODY_CLASS}>
+      {rowIndices.map((index) =>
+        isSplit ? (
+          <div key={index} className="flex">
+            <BoardTableRow entry={left[index] ?? null} className={COLUMN_CLASS} />
+            <BoardTableRow entry={right[index] ?? null} className={COLUMN_CLASS} />
+          </div>
+        ) : (
+          <BoardTableRow key={index} entry={left[index] ?? null} />
+        ),
+      )}
+    </div>
+  );
+}
+
+function BoardTable({
+  left,
+  right,
+}: {
+  left: BoardEntry[];
+  right: BoardEntry[];
+}) {
+  const isSplit = right.length > 0;
+
+  return (
+    <div
+      className={`relative overflow-hidden rounded-[20px] shadow-[0_4px_24px_rgba(74,52,40,0.08)] ${isSplit ? "w-full" : "w-[1320px]"}`}
+    >
+      <BoardTableBackground centered={!isSplit} />
+      <div className="relative z-10">
+        {isSplit ? (
+          <div className="relative">
+            <BoardSplitDivider />
+            <div className="flex">
+              <BoardTableHeader className={COLUMN_CLASS} />
+              <BoardTableHeader className={COLUMN_CLASS} />
+            </div>
+            <BoardTableBody left={left} right={right} isSplit />
+          </div>
+        ) : (
+          <>
+            <BoardTableHeader />
+            <BoardTableBody left={left} right={right} isSplit={false} />
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function useBoardScale(containerRef: RefObject<HTMLDivElement | null>) {
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
@@ -102,53 +211,61 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
     };
 
     updateScale();
-    window.addEventListener("resize", updateScale);
-    return () => window.removeEventListener("resize", updateScale);
-  }, []);
+
+    const observer = new ResizeObserver(updateScale);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [containerRef]);
+
+  return scale;
+}
+
+export function BoardView({ date, left, right, error }: BoardViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scale = useBoardScale(containerRef);
 
   return (
     <div
       ref={containerRef}
       className="flex h-dvh w-full items-center justify-center overflow-hidden"
-      style={{ backgroundColor: BOARD_BG }}
+      style={{ backgroundColor: CREAM }}
     >
       <div
-        className="flex shrink-0 flex-col"
+        className="relative flex shrink-0 flex-col"
         style={{
           width: DESIGN_WIDTH,
           height: DESIGN_HEIGHT,
-          backgroundColor: BOARD_BG,
           transform: `scale(${scale})`,
           transformOrigin: "center center",
+          fontFamily: '"Noto Serif KR", "Batang", "Times New Roman", serif',
+          color: BROWN,
         }}
       >
-        <header className="flex shrink-0 items-center justify-center pt-10 pb-6">
-          <h1 className={`text-[60px] tracking-tight ${BOARD_TEXT}`}>
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-6 rounded-sm border"
+          style={{ borderColor: FRAME_BORDER }}
+        />
+
+        <header className="relative z-10 flex shrink-0 flex-col items-center pt-14">
+          <h1 className="text-[60px] font-black tracking-tight">
             {formatBoardTitle(date)}
           </h1>
         </header>
 
-        <div className="mx-8 mb-10 flex min-h-0 flex-1 flex-col">
-          <div className="relative flex min-h-0 min-w-0 flex-1 overflow-hidden rounded-[32px] bg-white shadow-md">
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 bg-no-repeat opacity-25"
-              style={{
-                backgroundImage: "url(/reservation-bg.png)",
-                backgroundSize: "100% 100%",
-              }}
-            />
-            <div className="relative z-10 flex min-h-0 min-w-0 flex-1">
-              <BoardColumn entries={left} />
-              <div className="w-[2px] shrink-0 flex-none self-stretch bg-[#e4e6ea]" />
-              <BoardColumn entries={right} />
-            </div>
-          </div>
+        <TitleDivider />
 
-          {error && (
-            <p className="mt-4 text-center text-[22px] text-red-600">{error}</p>
-          )}
-        </div>
+        <main className="relative z-10 mx-auto flex min-h-0 w-full flex-1 px-12 pb-6">
+          <div className="flex w-full justify-center">
+            <BoardTable left={left} right={right} />
+          </div>
+        </main>
+
+        {error && (
+          <p className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 text-center text-[22px] text-red-600">
+            {error}
+          </p>
+        )}
       </div>
     </div>
   );

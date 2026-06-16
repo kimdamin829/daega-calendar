@@ -58,8 +58,7 @@ const BOARD_GUEST_NAME_MAX = 6;
 function formatBoardGuestName(raw: string): string {
   const masked = maskGuestName(raw);
   const chars = [...masked];
-  if (chars.length <= BOARD_GUEST_NAME_MAX) return masked;
-  return `${chars.slice(0, BOARD_GUEST_NAME_MAX).join("")}...`;
+  return chars.slice(0, BOARD_GUEST_NAME_MAX).join("");
 }
 
 function toBoardEntry(reservation: Reservation): BoardEntry {
