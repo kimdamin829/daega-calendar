@@ -6,17 +6,17 @@ import { pushWidgetMonthSummaries } from "@/lib/widgetBridge";
 import { useReservationLoader } from "@/hooks/useReservationLoader";
 
 export function useBoardReservations(dateKey: string) {
-  const { reservations, error } = useReservationLoader(dateKey, dateKey);
+  const { reservations, error, hasLoaded } = useReservationLoader(dateKey, dateKey);
   const board = useMemo(() => buildStatusBoard(reservations), [reservations]);
 
   useEffect(() => {
-    const viewMonth = koreaDateKeyToDate(dateKey);
+    if (!hasLoaded) return;
     pushWidgetMonthSummaries(
-      viewMonth,
+      koreaDateKeyToDate(dateKey),
       summarizeReservationsByDate(reservations),
-      { merge: true },
+      { merge: true, allowEmpty: true },
     );
-  }, [dateKey, reservations]);
+  }, [dateKey, hasLoaded, reservations]);
 
   return { board, error };
 }

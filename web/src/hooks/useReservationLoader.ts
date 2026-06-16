@@ -14,6 +14,7 @@ export function useReservationLoader(
 ) {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const requestIdRef = useRef(0);
   const transformRef = useRef(transform);
   transformRef.current = transform;
@@ -29,17 +30,20 @@ export function useReservationLoader(
       const next = transformRef.current ? await transformRef.current(data) : data;
       if (requestId !== requestIdRef.current) return;
       setReservations(next);
+      setHasLoaded(true);
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
       setError(err instanceof Error ? err.message : LOAD_ERROR);
+      setHasLoaded(true);
     }
   }, [start, end]);
 
   useEffect(() => {
+    setHasLoaded(false);
     void load();
   }, [load]);
 
   useEffect(() => subscribeReservations(() => void load()), [load]);
 
-  return { reservations, setReservations, error, load };
+  return { reservations, setReservations, error, load, hasLoaded };
 }

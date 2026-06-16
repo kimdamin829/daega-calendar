@@ -34,7 +34,7 @@ export function useReservations(month: Date, selectedDate: Date) {
   const monthRef = useRef(month);
   monthRef.current = month;
 
-  const { reservations, setReservations, error, load } = useReservationLoader(
+  const { reservations, setReservations, error, load, hasLoaded } = useReservationLoader(
     monthStart,
     monthEnd,
     withoutOrphanPlaceholders,
@@ -46,7 +46,7 @@ export function useReservations(month: Date, selectedDate: Date) {
   const inflightSavesRef = useRef(new Map<string, Promise<void>>());
 
   const pushWidgetNow = useCallback((nextReservations: Reservation[]) => {
-    syncWidgetFromReservations(monthRef.current, nextReservations);
+    syncWidgetFromReservations(monthRef.current, nextReservations, { allowEmpty: true });
   }, []);
 
   const applyLocalChange = useCallback(
@@ -66,10 +66,11 @@ export function useReservations(month: Date, selectedDate: Date) {
     [reservations],
   );
 
-  // 서버 로드·realtime 동기화 후에도 위젯 맞춤
+  // 서버 로드·realtime 후 위젯 동기화 (로드 전 빈 push 금지)
   useEffect(() => {
-    syncWidgetFromReservations(month, reservations);
-  }, [month, reservations]);
+    if (!hasLoaded) return;
+    syncWidgetFromReservations(month, reservations, { allowEmpty: true });
+  }, [hasLoaded, month, reservations]);
 
   const dayReservations = useMemo(
     () =>
