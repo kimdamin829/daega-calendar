@@ -14,7 +14,6 @@ import {
 import { deleteReservation, updateReservation } from "@/lib/supabase";
 import { markLocalReservationMutation } from "@/lib/realtime";
 import {
-  debugWidgetBridge,
   refreshWidgetInBackground,
   syncWidgetFromReservations,
 } from "@/lib/widgetBridge";
@@ -52,12 +51,6 @@ export function useReservations(month: Date, selectedDate: Date) {
   const blockMountPushUntilRef = useRef(0);
 
   const pushWidgetNow = useCallback((nextReservations: Reservation[], reason: string, focusDate?: string) => {
-    const summary = summarizeReservationsByDate(nextReservations);
-    const keys = [...summary.keys()].sort();
-    // 저장 액션 직후 실제 전달되는 데이터 검증용 로그
-    console.log(
-      `[widget-sync] reason=${reason} reservations=${nextReservations.length} summaryKeys=${keys.length} focusDate=${focusDate ?? "-"} hasFocus=${focusDate ? keys.includes(focusDate) : "-"}`,
-    );
     if (
       reason.startsWith("delete:") ||
       reason.startsWith("save:") ||
@@ -105,11 +98,7 @@ export function useReservations(month: Date, selectedDate: Date) {
   useEffect(() => {
     if (!hasLoaded) return;
     if (hasSentInitialMountPushRef.current) return;
-    if (Date.now() < blockMountPushUntilRef.current) {
-      console.log("[widget-sync] mount push ignored by recent user action");
-      return;
-    }
-    debugWidgetBridge("mount");
+    if (Date.now() < blockMountPushUntilRef.current) return;
     syncWidgetFromReservations(month, reservations, { allowEmpty: true, reason: "mount" });
     hasSentInitialMountPushRef.current = true;
   }, [hasLoaded, month, reservations]);
@@ -150,7 +139,6 @@ export function useReservations(month: Date, selectedDate: Date) {
         );
         const base = reservationsRef.current;
         const nextAfterSave = replaceDraftInList(base, draft.id, saved);
-        debugWidgetBridge("save:success");
         setAndPushNow(nextAfterSave, "save:success", saved.date);
         refreshWidgetInBackground();
       })();
@@ -186,7 +174,6 @@ export function useReservations(month: Date, selectedDate: Date) {
         const nextAfterSave = base.map((reservation) =>
           reservation.id === id ? { ...reservation, ...updated } : reservation,
         );
-        debugWidgetBridge("update:position:success");
         setAndPushNow(nextAfterSave, "position:success", updated.date);
         refreshWidgetInBackground();
       } catch {
@@ -210,7 +197,6 @@ export function useReservations(month: Date, selectedDate: Date) {
         const nextAfterSave = base.map((reservation) =>
           reservation.id === id ? { ...reservation, ...updated } : reservation,
         );
-        debugWidgetBridge("update:color:success");
         setAndPushNow(nextAfterSave, "color:success", updated.date);
         refreshWidgetInBackground();
       } catch {
@@ -228,7 +214,6 @@ export function useReservations(month: Date, selectedDate: Date) {
       try {
         await deleteReservation(id);
         const nextAfterDelete = reservationsRef.current.filter((reservation) => reservation.id !== id);
-        debugWidgetBridge("delete:success");
         setAndPushNow(nextAfterDelete, "delete:success", target?.date);
         refreshWidgetInBackground();
       } catch {

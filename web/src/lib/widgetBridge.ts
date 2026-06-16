@@ -9,14 +9,8 @@ import {
 declare global {
   interface Window {
     DaegaCalendarAndroid?: {
-      debugLog(reason: string): void;
       refreshWidget(): void;
       pushMonthSummaries(json: string): void;
-    };
-    __bridgeDebugState?: {
-      available: boolean;
-      lastReason: string;
-      updatedAt: number;
     };
   }
 }
@@ -26,9 +20,9 @@ export type WidgetPushOptions = {
   merge?: boolean;
   /** true면 예약 0건인 달도 위젯 캐시를 비움 (로드 완료 후에만) */
   allowEmpty?: boolean;
-  /** 디버그용: 방금 저장한 날짜 */
+  /** 방금 저장한 날짜(추적용) */
   focusDate?: string;
-  /** 디버그용: push 호출 이유 */
+  /** push 호출 이유(우선순위 판단용) */
   reason?: string;
 };
 
@@ -75,35 +69,17 @@ export function pushWidgetMonthSummaries(
 ): void {
   try {
     const bridge = window.DaegaCalendarAndroid;
-    if (!bridge) {
-      window.__bridgeDebugState = {
-        available: false,
-        lastReason: `push:missing-bridge:${options?.reason ?? "-"}`,
-        updatedAt: Date.now(),
-      };
-      return;
-    }
-    window.__bridgeDebugState = {
-      available: true,
-      lastReason: `push:start:${options?.reason ?? "-"}`,
-      updatedAt: Date.now(),
-    };
+    if (!bridge) return;
 
     const days = serializeDays(daySummaries);
     const merge = options?.merge ?? false;
     const allowEmpty = options?.allowEmpty ?? false;
     const { year, month } = monthPartsFromDate(viewMonth);
-    const payloadKeys = Object.keys(days).sort();
-    console.log(
-      `[widget-push] reason=${options?.reason ?? "-"} month=${year}-${month} keys=${payloadKeys.length} focusDate=${options?.focusDate ?? "-"} hasFocus=${options?.focusDate ? payloadKeys.includes(options.focusDate) : "-"}`,
-    );
-
     // 로드 전 빈 push가 위젯 캐시를 막아버리는 것 방지
     if (!merge && !allowEmpty && Object.keys(days).length === 0) {
       return;
     }
 
-    bridge.debugLog(`push:before:${options?.reason ?? "-"}`);
     bridge.pushMonthSummaries(
       JSON.stringify({
         year,
@@ -114,37 +90,8 @@ export function pushWidgetMonthSummaries(
         days,
       }),
     );
-    window.__bridgeDebugState = {
-      available: true,
-      lastReason: `push:sent:${options?.reason ?? "-"}`,
-      updatedAt: Date.now(),
-    };
   } catch {
     // WebView 브릿지 없음
-    window.__bridgeDebugState = {
-      available: false,
-      lastReason: `push:exception:${options?.reason ?? "-"}`,
-      updatedAt: Date.now(),
-    };
-  }
-}
-
-export function debugWidgetBridge(reason: string): void {
-  try {
-    const bridge = window.DaegaCalendarAndroid;
-    window.__bridgeDebugState = {
-      available: Boolean(bridge),
-      lastReason: `debug:${reason}`,
-      updatedAt: Date.now(),
-    };
-    bridge?.debugLog(reason);
-  } catch {
-    // WebView 브릿지 없음
-    window.__bridgeDebugState = {
-      available: false,
-      lastReason: `debug:exception:${reason}`,
-      updatedAt: Date.now(),
-    };
   }
 }
 

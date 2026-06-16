@@ -38,7 +38,6 @@ function CalendarApp({ initialSelectedDate, initialView }: {
   const [selectedDate, setSelectedDate] = useState(initialSelectedDate);
   const [month, setMonth] = useState(() => startOfMonth(initialSelectedDate));
   const [view, setView] = useState<ViewMode>(initialView);
-  const [bridgeDebug, setBridgeDebug] = useState("bridge:unknown");
 
   const {
     dayReservations,
@@ -74,24 +73,6 @@ function CalendarApp({ initialSelectedDate, initialView }: {
     syncCalendarUrl(selectedDate, view);
   }, [selectedDate, view]);
 
-  useEffect(() => {
-    const update = () => {
-      const state = window.__bridgeDebugState;
-      if (!state) {
-        setBridgeDebug(
-          `bridge:${window.DaegaCalendarAndroid ? "ok" : "none"} event=none`,
-        );
-        return;
-      }
-      setBridgeDebug(
-        `bridge:${state.available ? "ok" : "none"} event=${state.lastReason}`,
-      );
-    };
-    update();
-    const timer = setInterval(update, 800);
-    return () => clearInterval(timer);
-  }, []);
-
   const handleDateSelect = (date: Date) => {
     applyNavigation(date, "day");
   };
@@ -108,31 +89,23 @@ function CalendarApp({ initialSelectedDate, initialView }: {
 
   if (view === "day") {
     return (
-      <div className="relative h-full">
-        <div className="pointer-events-none absolute top-1 right-1 z-50 rounded bg-black/80 px-2 py-1 text-[10px] text-white">
-          {bridgeDebug}
-        </div>
-        <DayView
-          date={selectedDate}
-          reservations={dayReservations}
-          error={error}
-          onBack={handleBackToMonth}
-          onUpdatePosition={updatePosition}
-          onSaveContent={saveReservationContent}
-          onUpdateColor={updateColor}
-          onDelete={remove}
-          onPreviousDay={() => handleDayChange(addDays(selectedDate, -1))}
-          onNextDay={() => handleDayChange(addDays(selectedDate, 1))}
-        />
-      </div>
+      <DayView
+        date={selectedDate}
+        reservations={dayReservations}
+        error={error}
+        onBack={handleBackToMonth}
+        onUpdatePosition={updatePosition}
+        onSaveContent={saveReservationContent}
+        onUpdateColor={updateColor}
+        onDelete={remove}
+        onPreviousDay={() => handleDayChange(addDays(selectedDate, -1))}
+        onNextDay={() => handleDayChange(addDays(selectedDate, 1))}
+      />
     );
   }
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
-      <div className="pointer-events-none absolute top-1 right-1 z-50 rounded bg-black/80 px-2 py-1 text-[10px] text-white">
-        {bridgeDebug}
-      </div>
       <MonthViewHeader month={month} todayKey={koreaTodayKey} onMonthChange={setMonth} />
       <MonthPickerBar month={month} onMonthChange={setMonth} />
 

@@ -14,7 +14,6 @@ import {
 import { useHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
 import { useRafValue } from "@/hooks/useRafValue";
 import { formatSelectedDateTitle, toDateString } from "@/lib/dateUtils";
-import { debugWidgetBridge } from "@/lib/widgetBridge";
 import {
   clampMinutes,
   DEFAULT_DURATION,
@@ -511,14 +510,12 @@ export function DayView({
   };
 
   const handleDelete = async (id: string) => {
-    debugWidgetBridge("delete:clicked");
     if (pending?.id === id) {
       resetCreation();
       closeEditor();
       return;
     }
     await onDelete(id);
-    debugWidgetBridge("delete:ui-success");
     closeEditor();
   };
 
