@@ -27,6 +27,8 @@ const PARTY_TEXT: Record<PartyTier, string> = {
 
 const HEADER_LABELS = ["시간", "고객명", "인원", "좌석"] as const;
 
+const ROW_INDICES = Array.from({ length: BOARD_COLUMN_SIZE }, (_, index) => index);
+
 interface BoardViewProps {
   date: Date;
   left: BoardEntry[];
@@ -34,16 +36,9 @@ interface BoardViewProps {
   error: string | null;
 }
 
-function getRowIndices(isSplit: boolean, entryCount: number): number[] {
-  if (isSplit) {
-    return Array.from({ length: BOARD_COLUMN_SIZE }, (_, index) => index);
-  }
-  return entryCount > 0 ? Array.from({ length: entryCount }, (_, index) => index) : [0];
-}
-
 function TitleDivider() {
   return (
-    <div className="flex shrink-0 items-center justify-center px-32 pb-8">
+    <div className="flex shrink-0 items-center justify-center px-32 pb-5">
       <div className="h-px flex-1" style={{ backgroundColor: FRAME_BORDER }} />
       <div
         className="mx-4 h-2 w-2 rotate-45"
@@ -144,11 +139,9 @@ function BoardTableBody({
   right: BoardEntry[];
   isSplit: boolean;
 }) {
-  const rowIndices = getRowIndices(isSplit, left.length);
-
   return (
     <div className={TABLE_BODY_CLASS}>
-      {rowIndices.map((index) =>
+      {ROW_INDICES.map((index) =>
         isSplit ? (
           <div key={index} className="flex">
             <BoardTableRow entry={left[index] ?? null} className={COLUMN_CLASS} />
@@ -248,14 +241,14 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
         />
 
         <header className="relative z-10 flex shrink-0 flex-col items-center pt-14">
-          <h1 className="text-[60px] font-black tracking-tight">
+          <h1 className="text-[54px] font-black tracking-tight">
             {formatBoardTitle(date)}
           </h1>
         </header>
 
         <TitleDivider />
 
-        <main className="relative z-10 mx-auto flex min-h-0 w-full flex-1 px-12 pb-6">
+        <main className="relative z-10 mx-auto -mt-2 w-full shrink-0 px-12">
           <div className="flex w-full justify-center">
             <BoardTable left={left} right={right} />
           </div>
