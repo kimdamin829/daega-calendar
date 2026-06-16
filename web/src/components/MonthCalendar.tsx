@@ -44,7 +44,7 @@ export function MonthCalendar({
   const { gridRef, maxPreviewLines } = useMonthGridPreviewLimit(weekCount, true);
 
   return (
-    <section className="flex min-h-0 flex-1 flex-col px-0 pb-2">
+    <section className="flex min-h-0 flex-1 flex-col px-0">
       <div
         className="flex min-h-0 flex-1 flex-col touch-pan-y"
         onPointerDown={swipe.onPointerDown}
@@ -67,8 +67,10 @@ export function MonthCalendar({
 
         <div
           ref={gridRef}
-          className="grid min-h-0 flex-1 grid-cols-7 overflow-hidden border-l-gcal-grid"
-          style={{ gridTemplateRows: `repeat(${weekCount}, minmax(0, 1fr))` }}
+          className="grid min-h-0 flex-1 grid-cols-7 content-start overflow-hidden border-l-gcal-grid"
+          style={{
+            gridTemplateRows: `repeat(${weekCount}, minmax(0, min(1fr, 3.75rem)))`,
+          }}
         >
           {days.map((day) => {
             const dateKey = getKoreaDateKey(day);
