@@ -1,6 +1,6 @@
 export type ReservationColor = "sky" | "yellow" | "green" | "pink" | "purple" | "gray";
 
-const SKY_BLOCK_STYLES = "border-sky-300 bg-sky-100 text-sky-950";
+const SKY_BLOCK_STYLES = "border-sky-400 bg-sky-200 text-sky-950";
 
 const DEFAULT_BLOCK_STYLES = {
   block: SKY_BLOCK_STYLES,
@@ -23,30 +23,30 @@ export const RESERVATION_COLORS: {
   {
     id: "yellow",
     label: "노랑",
-    block: "border-yellow-300 bg-yellow-100 text-yellow-950",
-    swatch: "bg-yellow-300",
-    ring: "ring-yellow-400",
+    block: "border-yellow-400 bg-yellow-200 text-yellow-950",
+    swatch: "bg-yellow-400",
+    ring: "ring-yellow-500",
   },
   {
     id: "green",
     label: "초록",
-    block: "border-green-300 bg-green-100 text-green-950",
-    swatch: "bg-green-400",
-    ring: "ring-green-400",
+    block: "border-green-400 bg-green-200 text-green-950",
+    swatch: "bg-green-500",
+    ring: "ring-green-500",
   },
   {
     id: "pink",
-    label: "분홍",
-    block: "border-pink-300 bg-pink-100 text-pink-950",
-    swatch: "bg-pink-300",
-    ring: "ring-pink-400",
+    label: "주황",
+    block: "border-orange-400 bg-orange-200 text-orange-950",
+    swatch: "bg-orange-400",
+    ring: "ring-orange-500",
   },
   {
     id: "purple",
     label: "보라",
-    block: "border-purple-300 bg-purple-100 text-purple-950",
-    swatch: "bg-purple-400",
-    ring: "ring-purple-400",
+    block: "border-purple-400 bg-purple-200 text-purple-950",
+    swatch: "bg-purple-500",
+    ring: "ring-purple-500",
   },
   {
     id: "gray",
@@ -69,11 +69,11 @@ export function getColorStyles(color: ReservationColor | null) {
 }
 
 const MONTH_CHIP_BY_COLOR: Record<ReservationColor, string> = {
-  sky: "bg-sky-100 text-sky-950",
-  yellow: "bg-yellow-100 text-yellow-950",
-  green: "bg-green-100 text-green-950",
-  pink: "bg-pink-100 text-pink-950",
-  purple: "bg-purple-100 text-purple-950",
+  sky: "bg-sky-200 text-sky-950",
+  yellow: "bg-yellow-200 text-yellow-950",
+  green: "bg-green-200 text-green-950",
+  pink: "bg-orange-200 text-orange-950",
+  purple: "bg-purple-200 text-purple-950",
   gray: "bg-gray-100 text-gray-950",
 };
 

@@ -67,7 +67,7 @@ export function ReservationBlock({
         willChange: isMoving ? "transform" : undefined,
       }}
       className={[
-        "absolute overflow-hidden rounded border px-2 py-1 text-left text-xs shadow-sm touch-none touch-manipulation",
+        "absolute overflow-hidden rounded border px-2 py-1 text-left text-sm shadow-sm touch-none touch-manipulation",
         colorStyles.block,
         isMoving
           ? "z-30 shadow-md"
@@ -133,7 +133,7 @@ export function ReservationBlock({
       }}
     >
       {displayText ? (
-        <span className="line-clamp-3 font-medium">{displayText}</span>
+        <span className="line-clamp-3 text-sm font-bold leading-tight">{displayText}</span>
       ) : !isEditing ? (
         <span className="text-[10px] opacity-60">탭해서 입력</span>
       ) : null}
