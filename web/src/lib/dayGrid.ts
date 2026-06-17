@@ -57,8 +57,7 @@ export function yToMinutes(y: number, hourHeight: number = HOUR_HEIGHT): number 
 }
 
 export function formatHourLabel(hour: number): string {
-  if (hour === 0) return "오전 12시";
-  if (hour === 24) return "오전 12시";
+  if (hour === 0 || hour === 24) return "";
   if (hour < 12) return `오전 ${hour}시`;
   if (hour === 12) return "오후 12시";
   return `오후 ${hour - 12}시`;
