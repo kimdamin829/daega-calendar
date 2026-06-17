@@ -88,6 +88,7 @@ export function DayView({
   const [repositioningId, setRepositioningId] = useState<string | null>(null);
   const [repositionOffsetY, setRepositionOffsetY] = useState(0);
   const dragOrigin = useRef({ clientY: 0, startMinutes: 0, duration: 0 });
+  const dragLastClientY = useRef(0);
   const repositionOrigin = useRef({ clientY: 0, startMinutes: 0, duration: 0 });
   const repositionBaseOffsetY = useRef(0);
   const createOrigin = useRef({ clientY: 0, startMinutes: 0 });
@@ -550,18 +551,20 @@ export function DayView({
       startMinutes: reservation.start_minutes,
       duration: reservation.duration_minutes,
     };
+    dragLastClientY.current = clientY;
     setDragOffsetY(0);
   };
 
   const handleDragMove = (clientY: number) => {
     if (!draggingId) return;
+    dragLastClientY.current = clientY;
     blockDrag.schedule(clientY - dragOrigin.current.clientY);
   };
 
   const handleDragEnd = async (id: string) => {
-    const offsetY = blockDrag.pendingRef.current;
+    const offsetY = dragLastClientY.current - dragOrigin.current.clientY;
     const duration = dragOrigin.current.duration;
-    const deltaMinutes = offsetYToSnappedMinutes(offsetY);
+    const deltaMinutes = offsetYToSnappedMinutes(offsetY, hourHeight);
     const newStart = clampMinutes(dragOrigin.current.startMinutes + deltaMinutes, duration);
 
     blockDrag.cancel();
