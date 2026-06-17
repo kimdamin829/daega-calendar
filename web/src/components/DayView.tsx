@@ -19,13 +19,13 @@ import {
   DEFAULT_DURATION,
   durationToHeight,
   formatHourLabel,
-  GRID_HEIGHT,
   HOUR_HEIGHT,
+  getGridHeight,
+  getTimelineContentOffsetY,
   minutesToY,
   offsetYToSnappedMinutes,
   SNAP_MINUTES,
   TIMELINE_HOUR_COUNT,
-  TIMELINE_CONTENT_OFFSET_Y,
   TIMELINE_END_HOUR,
   TIMELINE_PADDING_ROWS,
   TIMELINE_START_HOUR,
@@ -54,6 +54,10 @@ interface DayViewProps {
 
 const TAP_THRESHOLD = 10;
 const GRID_WARMUP_MS = 500;
+const ZOOM_STORAGE_KEY = "day-view-zoom";
+const DAY_VIEW_MIN_ZOOM = 0.85;
+const DAY_VIEW_MAX_ZOOM = 1.6;
+const DAY_VIEW_ZOOM_STEP = 0.1;
 
 export function DayView({
   date,
@@ -107,6 +111,16 @@ export function DayView({
     start_minutes: number;
     duration_minutes: number;
   } | null>(null);
+  const [zoom, setZoom] = useState(() => {
+    if (typeof window === "undefined") return 1;
+    const parsed = Number(window.localStorage.getItem(ZOOM_STORAGE_KEY));
+    if (!Number.isFinite(parsed)) return 1;
+    return Math.min(DAY_VIEW_MAX_ZOOM, Math.max(DAY_VIEW_MIN_ZOOM, parsed));
+  });
+  const hourHeight = Math.round(HOUR_HEIGHT * zoom);
+  const gridHeight = getGridHeight(hourHeight);
+  const timelineOffsetY = getTimelineContentOffsetY(hourHeight);
+  const pendingZoomAnchorMinutes = useRef<number | null>(null);
 
   const displayReservations = useMemo(() => {
     const list =
@@ -188,27 +202,58 @@ export function DayView({
     const scroll = scrollRef.current;
     if (!target || !scroll) return;
 
-    const blockTop = minutesToY(target.start_minutes);
-    const blockBottom = blockTop + durationToHeight(target.duration_minutes);
+    const blockTop = minutesToY(target.start_minutes, hourHeight);
+    const blockBottom = blockTop + durationToHeight(target.duration_minutes, hourHeight);
     const viewTop = scroll.scrollTop;
     const viewBottom = viewTop + scroll.clientHeight;
 
     if (blockTop < viewTop || blockBottom > viewBottom) {
       scroll.scrollTo({
-        top: Math.max(0, blockTop - HOUR_HEIGHT),
+        top: Math.max(0, blockTop - hourHeight),
         behavior: "smooth",
       });
     }
-  }, [pending?.id, editingId]);
+  }, [pending?.id, editingId, hourHeight, pending, reservations]);
 
   const getMinutesFromPointer = useCallback((clientY: number) => {
     const grid = gridRef.current;
     if (!grid) return 0;
 
     const rect = grid.getBoundingClientRect();
-    const y = Math.max(0, Math.min(clientY - rect.top, GRID_HEIGHT));
-    return yToMinutes(y);
-  }, []);
+    const y = Math.max(0, Math.min(clientY - rect.top, gridHeight));
+    return yToMinutes(y, hourHeight);
+  }, [gridHeight, hourHeight]);
+
+  const applyZoom = useCallback((nextZoom: number) => {
+    const clamped = Math.min(DAY_VIEW_MAX_ZOOM, Math.max(DAY_VIEW_MIN_ZOOM, nextZoom));
+    if (Math.abs(clamped - zoom) < 0.001) return;
+
+    const scroll = scrollRef.current;
+    if (scroll) {
+      const centerY = scroll.scrollTop + scroll.clientHeight / 2;
+      pendingZoomAnchorMinutes.current = yToMinutes(centerY, hourHeight);
+    }
+
+    setZoom(clamped);
+  }, [hourHeight, zoom]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(ZOOM_STORAGE_KEY, zoom.toFixed(2));
+  }, [zoom]);
+
+  useEffect(() => {
+    const scroll = scrollRef.current;
+    const anchorMinutes = pendingZoomAnchorMinutes.current;
+    if (!scroll || anchorMinutes === null) return;
+    pendingZoomAnchorMinutes.current = null;
+
+    requestAnimationFrame(() => {
+      const centeredTop = minutesToY(anchorMinutes, hourHeight) - scroll.clientHeight / 2;
+      const maxTop = Math.max(0, gridHeight - scroll.clientHeight);
+      scroll.scrollTop = Math.max(0, Math.min(centeredTop, maxTop));
+    });
+  }, [gridHeight, hourHeight]);
 
   const resetCreation = useCallback(() => {
     isCreating.current = false;
@@ -288,7 +333,8 @@ export function DayView({
       isRepositioning.current = true;
       setRepositioningId(editingId);
       repositionOrigin.current = { clientY, startMinutes, duration };
-      repositionBaseOffsetY.current = minutesToY(targetMinutes) - minutesToY(startMinutes);
+            repositionBaseOffsetY.current =
+              minutesToY(targetMinutes, hourHeight) - minutesToY(startMinutes, hourHeight);
       repositionDrag.cancel();
       repositionDrag.schedule(repositionBaseOffsetY.current);
     },
@@ -314,7 +360,7 @@ export function DayView({
       const dragged = Math.abs(deltaY) > 4;
       const newStart = dragged
         ? clampMinutes(
-            repositionOrigin.current.startMinutes + offsetYToSnappedMinutes(deltaY),
+            repositionOrigin.current.startMinutes + offsetYToSnappedMinutes(deltaY, hourHeight),
             duration,
           )
         : getSnappedStartFromClientY(clientY, duration);
@@ -611,7 +657,27 @@ export function DayView({
         >
           <span className="text-3xl leading-none font-light">‹</span>
         </button>
-        <h1 className="text-lg text-[#3c4043]">{formatSelectedDateTitle(date)}</h1>
+        <h1 className="mr-auto text-lg text-[#3c4043]">{formatSelectedDateTitle(date)}</h1>
+        <div className="flex items-center gap-1 rounded-full border border-gcal-border px-1 py-1">
+          <button
+            type="button"
+            onClick={() => applyZoom(zoom - DAY_VIEW_ZOOM_STEP)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-[#3c4043] hover:bg-[#f1f3f4] disabled:opacity-40"
+            aria-label="시간표 축소"
+            disabled={zoom <= DAY_VIEW_MIN_ZOOM + 0.001}
+          >
+            −
+          </button>
+          <button
+            type="button"
+            onClick={() => applyZoom(zoom + DAY_VIEW_ZOOM_STEP)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-[#3c4043] hover:bg-[#f1f3f4] disabled:opacity-40"
+            aria-label="시간표 확대"
+            disabled={zoom >= DAY_VIEW_MAX_ZOOM - 0.001}
+          >
+            +
+          </button>
+        </div>
       </header>
 
       {error && (
@@ -619,7 +685,7 @@ export function DayView({
       )}
 
       <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
-        <div className="relative flex" style={{ minHeight: GRID_HEIGHT }}>
+        <div className="relative flex" style={{ minHeight: gridHeight }}>
           <div
             className="sticky left-0 z-20 w-16 shrink-0 touch-pan-y bg-white"
             onPointerDown={(event) => {
@@ -632,13 +698,13 @@ export function DayView({
           >
             <div
               className="border-r border-gcal-border"
-              style={{ height: TIMELINE_PADDING_ROWS * HOUR_HEIGHT }}
+              style={{ height: TIMELINE_PADDING_ROWS * hourHeight }}
             />
             {Array.from({ length: TIMELINE_HOUR_COUNT }, (_, index) => (
               <div
                 key={TIMELINE_START_HOUR + index}
                 className="relative border-r border-gcal-border text-right text-xs text-gcal-gray"
-                style={{ height: HOUR_HEIGHT }}
+                style={{ height: hourHeight }}
               >
                 <span className="absolute -top-2 right-2">
                   {formatHourLabel(TIMELINE_START_HOUR + index)}
@@ -652,14 +718,14 @@ export function DayView({
             </div>
             <div
               className="border-r border-gcal-border"
-              style={{ height: TIMELINE_PADDING_ROWS * HOUR_HEIGHT }}
+              style={{ height: TIMELINE_PADDING_ROWS * hourHeight }}
             />
           </div>
 
           <div
             ref={gridRef}
             className="relative flex-1 touch-pan-y select-none"
-            style={{ height: GRID_HEIGHT }}
+            style={{ height: gridHeight }}
             onPointerDown={(event) => {
               if (draggingId) return;
               if (event.pointerType === "mouse" && event.button !== 0) return;
@@ -703,15 +769,15 @@ export function DayView({
                 key={hour}
                 className="pointer-events-none absolute right-0 left-0 border-t border-gcal-border"
                 style={{
-                  top: TIMELINE_CONTENT_OFFSET_Y + hour * HOUR_HEIGHT,
-                  height: HOUR_HEIGHT,
+                  top: timelineOffsetY + hour * hourHeight,
+                  height: hourHeight,
                 }}
               />
             ))}
             <div
               className="pointer-events-none absolute right-0 left-0 border-t border-gcal-border"
               style={{
-                top: TIMELINE_CONTENT_OFFSET_Y + TIMELINE_HOUR_COUNT * HOUR_HEIGHT,
+                top: timelineOffsetY + TIMELINE_HOUR_COUNT * hourHeight,
               }}
             />
 
@@ -726,6 +792,7 @@ export function DayView({
                   key={reservation.id}
                   reservation={reservation}
                   layout={layout}
+                  hourHeight={hourHeight}
                   isPending={pending?.id === reservation.id}
                   isEditing={editingId === reservation.id}
                   liveText={editingId === reservation.id ? liveEditText : undefined}

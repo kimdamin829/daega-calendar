@@ -8,6 +8,7 @@ import { getColorStyles } from "@/lib/reservationColors";
 interface ReservationBlockProps {
   reservation: Reservation;
   layout: BlockLayout;
+  hourHeight: number;
   isDragging: boolean;
   isRepositioning?: boolean;
   isPending?: boolean;
@@ -27,6 +28,7 @@ const HORIZONTAL_GAP = 4;
 export function ReservationBlock({
   reservation,
   layout,
+  hourHeight,
   isDragging,
   isRepositioning = false,
   isPending = false,
@@ -48,8 +50,8 @@ export function ReservationBlock({
     : formatReservationDisplay(reservation);
 
   const visualOffsetY = isDragging ? dragOffsetY : isRepositioning ? repositionOffsetY : 0;
-  const top = minutesToY(reservation.start_minutes);
-  const height = Math.max(durationToHeight(reservation.duration_minutes) - 2, 24);
+  const top = minutesToY(reservation.start_minutes, hourHeight);
+  const height = Math.max(durationToHeight(reservation.duration_minutes, hourHeight) - 2, 24);
   const widthPercent = 100 / layout.totalColumns;
   const leftPercent = layout.column * widthPercent;
   const isMoving = isDragging || isRepositioning;
@@ -133,7 +135,7 @@ export function ReservationBlock({
       }}
     >
       {displayText ? (
-        <span className="line-clamp-3 text-sm font-bold leading-tight">{displayText}</span>
+        <span className="line-clamp-3 text-sm font-semibold leading-tight">{displayText}</span>
       ) : !isEditing ? (
         <span className="text-[10px] opacity-60">탭해서 입력</span>
       ) : null}
