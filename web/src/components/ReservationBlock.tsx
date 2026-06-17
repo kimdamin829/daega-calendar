@@ -23,6 +23,7 @@ interface ReservationBlockProps {
 }
 
 const DRAG_THRESHOLD = 10;
+const TOUCH_DRAG_THRESHOLD = 2;
 const HORIZONTAL_GAP = 4;
 const TOUCH_LONG_PRESS_MS = 180;
 
@@ -106,7 +107,7 @@ export function ReservationBlock({
         const dy = event.clientY - pointerStart.current.y;
         const distance = Math.hypot(dx, dy);
         const dragThreshold =
-          event.pointerType === "touch" ? 1 : DRAG_THRESHOLD;
+          event.pointerType === "touch" ? TOUCH_DRAG_THRESHOLD : DRAG_THRESHOLD;
 
         if (event.pointerType === "touch" && !touchLongPressReady.current) {
           // Long-press 전에 손가락이 움직이면 드래그를 취소해 스크롤/핀치 우선.

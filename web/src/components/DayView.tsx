@@ -57,6 +57,8 @@ const GRID_WARMUP_MS = 500;
 const ZOOM_STORAGE_KEY = "day-view-zoom";
 const DAY_VIEW_MIN_ZOOM = 0.65;
 const DAY_VIEW_MAX_ZOOM = 2.2;
+const EMPTY_GRID_GESTURE = { active: false, x: 0, y: 0, clientY: 0, isScroll: false };
+const dayScrollByDateKey = new Map<string, number>();
 
 export function DayView({
   date,
@@ -94,13 +96,7 @@ export function DayView({
   const createOrigin = useRef({ clientY: 0, startMinutes: 0 });
   const isCreating = useRef(false);
   const pendingRef = useRef<Reservation | null>(null);
-  const gridGesture = useRef({
-    active: false,
-    x: 0,
-    y: 0,
-    clientY: 0,
-    isScroll: false,
-  });
+  const gridGesture = useRef({ ...EMPTY_GRID_GESTURE });
   const isRepositioning = useRef(false);
   const repositionDrag = useRafValue(setRepositionOffsetY);
   const blockDrag = useRafValue(setDragOffsetY);
@@ -113,7 +109,12 @@ export function DayView({
   } | null>(null);
   const [zoom, setZoom] = useState(() => {
     if (typeof window === "undefined") return 1;
-    const parsed = Number(window.localStorage.getItem(ZOOM_STORAGE_KEY));
+    let parsed = Number.NaN;
+    try {
+      parsed = Number(window.localStorage.getItem(ZOOM_STORAGE_KEY));
+    } catch {
+      return 1;
+    }
     if (!Number.isFinite(parsed)) return 1;
     return Math.min(DAY_VIEW_MAX_ZOOM, Math.max(DAY_VIEW_MIN_ZOOM, parsed));
   });
@@ -200,6 +201,14 @@ export function DayView({
   }, [draggingId]);
 
   useEffect(() => {
+    return () => {
+      const scroll = scrollRef.current;
+      if (!scroll) return;
+      dayScrollByDateKey.set(dateKey, scroll.scrollTop);
+    };
+  }, [dateKey]);
+
+  useEffect(() => {
     if (isCreating.current) return;
 
     const target =
@@ -249,23 +258,25 @@ export function DayView({
   };
 
   const handlePinchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    if (draggingId || isCreating.current || isRepositioning.current) return;
     if (event.touches.length < 2) return;
     const distance = touchDistance(event);
     if (distance <= 0) return;
     pinchState.current.active = true;
     pinchState.current.startDistance = distance;
     pinchState.current.startZoom = zoom;
-    gridGesture.current = { active: false, x: 0, y: 0, clientY: 0, isScroll: false };
-  }, [zoom]);
+    gridGesture.current = { ...EMPTY_GRID_GESTURE };
+  }, [draggingId, zoom]);
 
   const handlePinchMove = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    if (draggingId || isCreating.current || isRepositioning.current) return;
     if (!pinchState.current.active || event.touches.length < 2) return;
     const distance = touchDistance(event);
     if (distance <= 0) return;
     event.preventDefault();
     const scale = distance / pinchState.current.startDistance;
     applyZoom(pinchState.current.startZoom * scale);
-  }, [applyZoom]);
+  }, [applyZoom, draggingId]);
 
   const handlePinchEnd = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
     if (event.touches.length >= 2) return;
@@ -274,7 +285,11 @@ export function DayView({
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(ZOOM_STORAGE_KEY, zoom.toFixed(2));
+    try {
+      window.localStorage.setItem(ZOOM_STORAGE_KEY, zoom.toFixed(2));
+    } catch {
+      // Ignore storage errors in restrictive WebView modes.
+    }
   }, [zoom]);
 
   useEffect(() => {
@@ -330,7 +345,7 @@ export function DayView({
   }, [dateKey, getMinutesFromPointer]);
 
   const cancelGridGesture = useCallback(() => {
-    gridGesture.current = { active: false, x: 0, y: 0, clientY: 0, isScroll: false };
+    gridGesture.current = { ...EMPTY_GRID_GESTURE };
   }, []);
 
   const commitTouchTapCreate = useCallback(
@@ -368,12 +383,12 @@ export function DayView({
       isRepositioning.current = true;
       setRepositioningId(editingId);
       repositionOrigin.current = { clientY, startMinutes, duration };
-            repositionBaseOffsetY.current =
-              minutesToY(targetMinutes, hourHeight) - minutesToY(startMinutes, hourHeight);
+      repositionBaseOffsetY.current =
+        minutesToY(targetMinutes, hourHeight) - minutesToY(startMinutes, hourHeight);
       repositionDrag.cancel();
       repositionDrag.schedule(repositionBaseOffsetY.current);
     },
-    [editingId, editingReservation, getSnappedStartFromClientY, repositionDrag],
+    [editingId, editingReservation, getSnappedStartFromClientY, hourHeight, repositionDrag],
   );
 
   const updateRepositioning = useCallback(
@@ -612,7 +627,6 @@ export function DayView({
 
   useEffect(() => {
     gridInteractiveAt.current = Date.now();
-    scrollRef.current?.scrollTo({ top: 0 });
     setEditingId(null);
     setLiveEditText("");
     setPending(null);
@@ -624,7 +638,14 @@ export function DayView({
     isRepositioning.current = false;
     setRepositioningId(null);
     setPositionPreview(null);
-  }, [dateKey]);
+    requestAnimationFrame(() => {
+      const scroll = scrollRef.current;
+      if (!scroll) return;
+      const savedTop = dayScrollByDateKey.get(dateKey) ?? 0;
+      const maxTop = Math.max(0, gridHeight - scroll.clientHeight);
+      scroll.scrollTop = Math.min(savedTop, maxTop);
+    });
+  }, [dateKey, gridHeight, repositionDrag]);
 
   const isGridInteractive = () => Date.now() - gridInteractiveAt.current > GRID_WARMUP_MS;
 
@@ -710,7 +731,13 @@ export function DayView({
         <p className="shrink-0 bg-red-50 px-4 py-2 text-sm text-red-600">{error}</p>
       )}
 
-      <div ref={scrollRef} className="min-h-0 flex-1 overflow-y-auto">
+      <div
+        ref={scrollRef}
+        className="min-h-0 flex-1 overflow-y-auto"
+        onScroll={(event) => {
+          dayScrollByDateKey.set(dateKey, event.currentTarget.scrollTop);
+        }}
+      >
         <div className="relative flex" style={{ minHeight: gridHeight }}>
           <div
             className="sticky left-0 z-20 w-16 shrink-0 touch-pan-y bg-white"
