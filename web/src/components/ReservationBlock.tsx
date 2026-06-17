@@ -24,6 +24,7 @@ interface ReservationBlockProps {
 
 const DRAG_THRESHOLD = 10;
 const HORIZONTAL_GAP = 4;
+const TOUCH_LONG_PRESS_MS = 220;
 
 export function ReservationBlock({
   reservation,
@@ -44,6 +45,8 @@ export function ReservationBlock({
   const pointerStart = useRef({ x: 0, y: 0 });
   const dragStarted = useRef(false);
   const didDragRef = useRef(false);
+  const touchLongPressReady = useRef(false);
+  const longPressTimerRef = useRef<number | null>(null);
   const colorStyles = getColorStyles(reservation.color);
   const displayText = isEditing
     ? liveText
@@ -86,15 +89,36 @@ export function ReservationBlock({
         pointerStart.current = { x: event.clientX, y: event.clientY };
         dragStarted.current = false;
         didDragRef.current = false;
-        event.currentTarget.setPointerCapture(event.pointerId);
+        touchLongPressReady.current = event.pointerType !== "touch";
+
+        if (event.pointerType === "touch") {
+          if (longPressTimerRef.current !== null) {
+            window.clearTimeout(longPressTimerRef.current);
+          }
+          longPressTimerRef.current = window.setTimeout(() => {
+            touchLongPressReady.current = true;
+            longPressTimerRef.current = null;
+          }, TOUCH_LONG_PRESS_MS);
+        }
       }}
       onPointerMove={(event) => {
         const dx = event.clientX - pointerStart.current.x;
         const dy = event.clientY - pointerStart.current.y;
+        const distance = Math.hypot(dx, dy);
 
-        if (!dragStarted.current && Math.hypot(dx, dy) > DRAG_THRESHOLD) {
+        if (event.pointerType === "touch" && !touchLongPressReady.current) {
+          // Long-press 전에 손가락이 움직이면 드래그를 취소해 스크롤/핀치 우선.
+          if (distance > DRAG_THRESHOLD && longPressTimerRef.current !== null) {
+            window.clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+          }
+          return;
+        }
+
+        if (!dragStarted.current && distance > DRAG_THRESHOLD) {
           dragStarted.current = true;
           didDragRef.current = true;
+          event.currentTarget.setPointerCapture(event.pointerId);
           onDragStart(reservation.id, event.clientY);
         }
 
@@ -104,7 +128,14 @@ export function ReservationBlock({
       }}
       onPointerUp={(event) => {
         event.stopPropagation();
-        event.currentTarget.releasePointerCapture(event.pointerId);
+        if (longPressTimerRef.current !== null) {
+          window.clearTimeout(longPressTimerRef.current);
+          longPressTimerRef.current = null;
+        }
+        touchLongPressReady.current = false;
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+          event.currentTarget.releasePointerCapture(event.pointerId);
+        }
 
         const wasDrag = dragStarted.current;
         dragStarted.current = false;
@@ -122,6 +153,11 @@ export function ReservationBlock({
         onSelect(reservation.id);
       }}
       onPointerCancel={(event) => {
+        if (longPressTimerRef.current !== null) {
+          window.clearTimeout(longPressTimerRef.current);
+          longPressTimerRef.current = null;
+        }
+        touchLongPressReady.current = false;
         if (event.currentTarget.hasPointerCapture(event.pointerId)) {
           event.currentTarget.releasePointerCapture(event.pointerId);
         }

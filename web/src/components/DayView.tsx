@@ -57,7 +57,6 @@ const GRID_WARMUP_MS = 500;
 const ZOOM_STORAGE_KEY = "day-view-zoom";
 const DAY_VIEW_MIN_ZOOM = 0.65;
 const DAY_VIEW_MAX_ZOOM = 2.2;
-const DAY_VIEW_ZOOM_STEP = 0.1;
 
 export function DayView({
   date,
@@ -247,6 +246,30 @@ export function DayView({
     const [a, b] = [event.touches[0], event.touches[1]];
     return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
   };
+
+  const handlePinchStart = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    if (event.touches.length < 2) return;
+    const distance = touchDistance(event);
+    if (distance <= 0) return;
+    pinchState.current.active = true;
+    pinchState.current.startDistance = distance;
+    pinchState.current.startZoom = zoom;
+    gridGesture.current = { active: false, x: 0, y: 0, clientY: 0, isScroll: false };
+  }, [zoom]);
+
+  const handlePinchMove = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    if (!pinchState.current.active || event.touches.length < 2) return;
+    const distance = touchDistance(event);
+    if (distance <= 0) return;
+    event.preventDefault();
+    const scale = distance / pinchState.current.startDistance;
+    applyZoom(pinchState.current.startZoom * scale);
+  }, [applyZoom]);
+
+  const handlePinchEnd = useCallback((event: React.TouchEvent<HTMLDivElement>) => {
+    if (event.touches.length >= 2) return;
+    pinchState.current.active = false;
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -661,27 +684,9 @@ export function DayView({
       onPointerDown={handleRootPointerDown}
       onPointerUpCapture={handleRootPointerUpCapture}
       onPointerCancel={daySwipe.onPointerCancel}
-      onTouchStart={(event) => {
-        if (event.touches.length < 2) return;
-        const distance = touchDistance(event);
-        if (distance <= 0) return;
-        pinchState.current.active = true;
-        pinchState.current.startDistance = distance;
-        pinchState.current.startZoom = zoom;
-        cancelGridGesture();
-      }}
-      onTouchMove={(event) => {
-        if (!pinchState.current.active || event.touches.length < 2) return;
-        const distance = touchDistance(event);
-        if (distance <= 0) return;
-        event.preventDefault();
-        const scale = distance / pinchState.current.startDistance;
-        applyZoom(pinchState.current.startZoom * scale);
-      }}
-      onTouchEnd={(event) => {
-        if (event.touches.length >= 2) return;
-        pinchState.current.active = false;
-      }}
+      onTouchStart={handlePinchStart}
+      onTouchMove={handlePinchMove}
+      onTouchEnd={handlePinchEnd}
       onTouchCancel={() => {
         pinchState.current.active = false;
       }}
@@ -695,27 +700,7 @@ export function DayView({
         >
           <span className="text-3xl leading-none font-light">‹</span>
         </button>
-        <h1 className="mr-auto text-lg text-[#3c4043]">{formatSelectedDateTitle(date)}</h1>
-        <div className="flex items-center gap-1 rounded-full border border-gcal-border px-1 py-1">
-          <button
-            type="button"
-            onClick={() => applyZoom(zoom - DAY_VIEW_ZOOM_STEP)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-[#3c4043] hover:bg-[#f1f3f4] disabled:opacity-40"
-            aria-label="시간표 축소"
-            disabled={zoom <= DAY_VIEW_MIN_ZOOM + 0.001}
-          >
-            −
-          </button>
-          <button
-            type="button"
-            onClick={() => applyZoom(zoom + DAY_VIEW_ZOOM_STEP)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-xl leading-none text-[#3c4043] hover:bg-[#f1f3f4] disabled:opacity-40"
-            aria-label="시간표 확대"
-            disabled={zoom >= DAY_VIEW_MAX_ZOOM - 0.001}
-          >
-            +
-          </button>
-        </div>
+        <h1 className="text-lg text-[#3c4043]">{formatSelectedDateTitle(date)}</h1>
       </header>
 
       {error && (
