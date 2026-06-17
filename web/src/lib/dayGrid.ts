@@ -2,9 +2,9 @@ export const HOUR_HEIGHT = 64;
 export const SNAP_MINUTES = 60;
 export const DEFAULT_DURATION = 60;
 
-export const TIMELINE_START_HOUR = 9;
-export const TIMELINE_END_HOUR = 21;
-export const TIMELINE_PADDING_ROWS = 1;
+export const TIMELINE_START_HOUR = 0;
+export const TIMELINE_END_HOUR = 24;
+export const TIMELINE_PADDING_ROWS = 0;
 const TIMELINE_START_MINUTES = TIMELINE_START_HOUR * 60;
 const TIMELINE_MIN_MINUTES =
   (TIMELINE_START_HOUR - TIMELINE_PADDING_ROWS) * 60;
@@ -58,6 +58,7 @@ export function yToMinutes(y: number, hourHeight: number = HOUR_HEIGHT): number 
 
 export function formatHourLabel(hour: number): string {
   if (hour === 0) return "오전 12시";
+  if (hour === 24) return "오전 12시";
   if (hour < 12) return `오전 ${hour}시`;
   if (hour === 12) return "오후 12시";
   return `오후 ${hour - 12}시`;

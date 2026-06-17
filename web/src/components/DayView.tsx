@@ -55,8 +55,8 @@ interface DayViewProps {
 const TAP_THRESHOLD = 10;
 const GRID_WARMUP_MS = 500;
 const ZOOM_STORAGE_KEY = "day-view-zoom";
-const DAY_VIEW_MIN_ZOOM = 0.85;
-const DAY_VIEW_MAX_ZOOM = 1.6;
+const DAY_VIEW_MIN_ZOOM = 0.65;
+const DAY_VIEW_MAX_ZOOM = 2.2;
 const DAY_VIEW_ZOOM_STEP = 0.1;
 
 export function DayView({
