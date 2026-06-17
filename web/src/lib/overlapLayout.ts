@@ -13,72 +13,47 @@ function overlapsTimeline(a: Reservation, b: Reservation): boolean {
   );
 }
 
-function endMinutes(reservation: Reservation): number {
-  return reservation.start_minutes + reservation.duration_minutes;
-}
-
-function splitConnectedGroups(sorted: Reservation[]): Reservation[][] {
+function getOverlapGroups(reservations: Reservation[]): Reservation[][] {
+  const sorted = [...reservations].sort(compareReservationsByTime);
+  const visited = new Set<string>();
   const groups: Reservation[][] = [];
-  let current: Reservation[] = [];
-  let currentEnd = -1;
 
-  for (const reservation of sorted) {
-    if (current.length === 0 || reservation.start_minutes < currentEnd) {
-      current.push(reservation);
-      currentEnd = Math.max(currentEnd, endMinutes(reservation));
-      continue;
-    }
+  for (const event of sorted) {
+    if (visited.has(event.id)) continue;
 
-    groups.push(current);
-    current = [reservation];
-    currentEnd = endMinutes(reservation);
-  }
+    const group: Reservation[] = [];
+    const stack = [event];
 
-  if (current.length > 0) groups.push(current);
-  return groups;
-}
+    while (stack.length > 0) {
+      const current = stack.pop()!;
+      if (visited.has(current.id)) continue;
 
-function layoutGroup(group: Reservation[], layouts: Map<string, BlockLayout>) {
-  const sorted = [...group].sort(compareReservationsByTime);
-  const activeByColumn: (Reservation | null)[] = [];
-  const columnById = new Map<string, number>();
-  let maxColumns = 0;
+      visited.add(current.id);
+      group.push(current);
 
-  for (const reservation of sorted) {
-    let placedColumn = -1;
-
-    for (let col = 0; col < activeByColumn.length; col += 1) {
-      const active = activeByColumn[col];
-      if (!active || !overlapsTimeline(active, reservation)) {
-        placedColumn = col;
-        break;
+      for (const other of sorted) {
+        if (!visited.has(other.id) && overlapsTimeline(current, other)) {
+          stack.push(other);
+        }
       }
     }
 
-    if (placedColumn === -1) {
-      placedColumn = activeByColumn.length;
-      activeByColumn.push(null);
-    }
-
-    activeByColumn[placedColumn] = reservation;
-    columnById.set(reservation.id, placedColumn);
-    maxColumns = Math.max(maxColumns, placedColumn + 1);
+    groups.push(group);
   }
 
-  for (const reservation of sorted) {
-    layouts.set(reservation.id, {
-      column: columnById.get(reservation.id) ?? 0,
-      totalColumns: maxColumns,
-    });
-  }
+  return groups;
 }
 
 export function layoutReservations(reservations: Reservation[]): Map<string, BlockLayout> {
   const layouts = new Map<string, BlockLayout>();
-  const sorted = [...reservations].sort(compareReservationsByTime);
 
-  for (const group of splitConnectedGroups(sorted)) {
-    layoutGroup(group, layouts);
+  for (const group of getOverlapGroups(reservations)) {
+    const groupSorted = [...group].sort(compareReservationsByTime);
+    const totalColumns = groupSorted.length;
+
+    groupSorted.forEach((event, column) => {
+      layouts.set(event.id, { column, totalColumns });
+    });
   }
 
   return layouts;
