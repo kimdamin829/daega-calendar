@@ -121,6 +121,11 @@ export function DayView({
   const gridHeight = getGridHeight(hourHeight);
   const timelineOffsetY = getTimelineContentOffsetY(hourHeight);
   const pendingZoomAnchorMinutes = useRef<number | null>(null);
+  const pinchState = useRef({
+    active: false,
+    startDistance: 0,
+    startZoom: 1,
+  });
 
   const displayReservations = useMemo(() => {
     const list =
@@ -236,6 +241,12 @@ export function DayView({
 
     setZoom(clamped);
   }, [hourHeight, zoom]);
+
+  const touchDistance = (event: React.TouchEvent<HTMLDivElement>) => {
+    if (event.touches.length < 2) return 0;
+    const [a, b] = [event.touches[0], event.touches[1]];
+    return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  };
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -618,6 +629,7 @@ export function DayView({
     onSwipeLeft: () => navigateDay(onNextDay),
     onSwipeRight: () => navigateDay(onPreviousDay),
     shouldIgnore: () =>
+      pinchState.current.active ||
       isRepositioning.current ||
       isCreating.current ||
       draggingId !== null ||
@@ -626,6 +638,7 @@ export function DayView({
 
   const handleRootPointerDown = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
+      if (pinchState.current.active) return;
       if (editorPanelRef.current?.contains(event.target as Node)) return;
       daySwipe.onPointerDown(event);
     },
@@ -634,6 +647,7 @@ export function DayView({
 
   const handleRootPointerUpCapture = useCallback(
     (event: React.PointerEvent<HTMLDivElement>) => {
+      if (pinchState.current.active) return;
       if (editorPanelRef.current?.contains(event.target as Node)) return;
       if (editingIdRef.current) return;
       void daySwipe.onPointerUp(event);
@@ -647,6 +661,30 @@ export function DayView({
       onPointerDown={handleRootPointerDown}
       onPointerUpCapture={handleRootPointerUpCapture}
       onPointerCancel={daySwipe.onPointerCancel}
+      onTouchStart={(event) => {
+        if (event.touches.length < 2) return;
+        const distance = touchDistance(event);
+        if (distance <= 0) return;
+        pinchState.current.active = true;
+        pinchState.current.startDistance = distance;
+        pinchState.current.startZoom = zoom;
+        cancelGridGesture();
+      }}
+      onTouchMove={(event) => {
+        if (!pinchState.current.active || event.touches.length < 2) return;
+        const distance = touchDistance(event);
+        if (distance <= 0) return;
+        event.preventDefault();
+        const scale = distance / pinchState.current.startDistance;
+        applyZoom(pinchState.current.startZoom * scale);
+      }}
+      onTouchEnd={(event) => {
+        if (event.touches.length >= 2) return;
+        pinchState.current.active = false;
+      }}
+      onTouchCancel={() => {
+        pinchState.current.active = false;
+      }}
     >
       <header className="flex shrink-0 items-center gap-2 border-b border-gcal-border px-3 pb-3 pt-screen-header">
         <button
@@ -728,6 +766,7 @@ export function DayView({
             style={{ height: gridHeight }}
             onPointerDown={(event) => {
               if (draggingId) return;
+              if (pinchState.current.active) return;
               if (event.pointerType === "mouse" && event.button !== 0) return;
               if (!isGridInteractive()) return;
               if (event.target !== event.currentTarget) return;
