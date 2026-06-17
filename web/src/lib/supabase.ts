@@ -23,7 +23,7 @@ function normalizeReservationRow(row: Reservation): Reservation {
     adult_count: row.adult_count ?? DEFAULT_PARTY_COUNTS.adult_count,
     child_count: row.child_count ?? DEFAULT_PARTY_COUNTS.child_count,
     infant_count: row.infant_count ?? DEFAULT_PARTY_COUNTS.infant_count,
-    start_minutes: startMinutes === 0 ? 540 : startMinutes,
+    start_minutes: startMinutes,
     duration_minutes: row.duration_minutes ?? 60,
     color: row.color ?? null,
   };

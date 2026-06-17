@@ -4,6 +4,7 @@ import { subscribeReservations } from "@/lib/realtime";
 import { fetchReservationsInRange } from "@/lib/supabase";
 
 const LOAD_ERROR = "예약 데이터를 불러오지 못했습니다.";
+const REFRESH_COOLDOWN_MS = 30_000;
 
 type ReservationTransform = (data: Reservation[]) => Reservation[] | Promise<Reservation[]>;
 
@@ -17,6 +18,7 @@ export function useReservationLoader(
   const [hasLoaded, setHasLoaded] = useState(false);
   const requestIdRef = useRef(0);
   const transformRef = useRef(transform);
+  const lastLoadAtRef = useRef(0);
   transformRef.current = transform;
 
   const load = useCallback(async () => {
@@ -31,6 +33,7 @@ export function useReservationLoader(
       if (requestId !== requestIdRef.current) return;
       setReservations(next);
       setHasLoaded(true);
+      lastLoadAtRef.current = Date.now();
     } catch (err) {
       if (requestId !== requestIdRef.current) return;
       setError(err instanceof Error ? err.message : LOAD_ERROR);
@@ -44,6 +47,29 @@ export function useReservationLoader(
   }, [load]);
 
   useEffect(() => subscribeReservations(() => void load()), [load]);
+
+  useEffect(() => {
+    const refreshIfStale = () => {
+      if (Date.now() - lastLoadAtRef.current < REFRESH_COOLDOWN_MS) return;
+      void load();
+    };
+
+    const onOnline = () => {
+      // Network recovery should reconcile missed realtime events immediately.
+      void load();
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState !== "visible") return;
+      refreshIfStale();
+    };
+
+    window.addEventListener("online", onOnline);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      window.removeEventListener("online", onOnline);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [load]);
 
   return { reservations, setReservations, error, load, hasLoaded };
 }
