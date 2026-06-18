@@ -4,7 +4,7 @@ import { BOARD_COLUMN_SIZE, formatBoardTitle, type BoardEntry } from "@/lib/stat
 
 const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
-const BG_OPACITY = 0.16;
+const BG_OPACITY = 0.24;
 
 const CREAM = "#f8f4ee";
 const BROWN = "#2a1c14";
