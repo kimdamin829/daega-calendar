@@ -11,11 +11,11 @@ export function useBoardReservations(dateKey: string) {
 
   useEffect(() => {
     if (!hasLoaded) return;
-    pushWidgetMonthSummaries(
-      koreaDateKeyToDate(dateKey),
-      summarizeReservationsByDate(reservations),
-      { merge: true, allowEmpty: true },
-    );
+    const month = koreaDateKeyToDate(dateKey);
+    pushWidgetMonthSummaries(month, summarizeReservationsByDate(reservations), {
+      merge: true,
+      allowEmpty: true,
+    });
   }, [dateKey, hasLoaded, reservations]);
 
   return { board, error };

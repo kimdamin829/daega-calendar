@@ -7,22 +7,25 @@ const DESIGN_HEIGHT = 1080;
 const BG_OPACITY = 0.16;
 
 const CREAM = "#f8f4ee";
-const BROWN = "#4a3428";
+const BROWN = "#2a1c14";
 const HEADER_BG = "#ebe3d6";
 const FRAME_BORDER = "#c4a882";
 
 const GRID_COLS =
   "grid-cols-[minmax(0,0.9fr)_minmax(0,1.5fr)_minmax(0,1.25fr)_minmax(0,1.15fr)]";
 const BOARD_FONT = "font-extrabold";
+const HEADER_TEXT = `text-[38px] ${BOARD_FONT}`;
+const CELL_TEXT = `text-[48px] ${BOARD_FONT}`;
+const TITLE_TEXT = `text-[62px] ${BOARD_FONT}`;
 const ROW_CLASS = `grid ${GRID_COLS} min-h-[78px] items-center px-10 text-center`;
 const COLUMN_CLASS = "min-w-0 flex-1";
-const SUFFIX_TEXT = `text-[32px] ${BOARD_FONT}`;
+const SUFFIX_TEXT = HEADER_TEXT;
 const TABLE_BODY_CLASS = "divide-y divide-[#f0ebe3]";
 
 const PARTY_TEXT: Record<PartyTier, string> = {
-  1: "text-[42px]",
-  2: "text-[39px]",
-  3: "text-[36px]",
+  1: "text-[50px]",
+  2: "text-[47px]",
+  3: "text-[44px]",
 };
 
 const HEADER_LABELS = ["시간", "고객명", "인원", "좌석"] as const;
@@ -67,7 +70,7 @@ function BoardTableBackground({ centered }: { centered: boolean }) {
 function BoardTableHeader({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`grid ${GRID_COLS} px-10 py-4 text-center text-[32px] ${BOARD_FONT} tracking-wide ${className}`}
+      className={`grid ${GRID_COLS} px-10 py-4 text-center ${HEADER_TEXT} tracking-wide ${className}`}
       style={{ backgroundColor: HEADER_BG, color: BROWN }}
     >
       {HEADER_LABELS.map((label) => (
@@ -115,12 +118,12 @@ function BoardTableRow({
   }
 
   const seatLabel = entry.seat?.trim() || "-";
-  const seatSize = seatLabel.length > 6 ? "text-[34px]" : "text-[40px]";
+  const seatSize = seatLabel.length > 6 ? "text-[42px]" : "text-[48px]";
 
   return (
     <div className={`${ROW_CLASS} ${className}`} style={{ color: BROWN }}>
-      <span className={`text-[40px] ${BOARD_FONT} tabular-nums`}>{entry.time}</span>
-      <span className={`text-[40px] ${BOARD_FONT}`}>
+      <span className={`${CELL_TEXT} tabular-nums`}>{entry.time}</span>
+      <span className={CELL_TEXT}>
         {entry.guestName}
         <span className={SUFFIX_TEXT}>님</span>
       </span>
@@ -166,7 +169,7 @@ function BoardTable({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[20px] shadow-[0_4px_24px_rgba(74,52,40,0.08)] ${isSplit ? "w-full" : "w-[1320px]"}`}
+      className={`relative overflow-hidden rounded-[20px] shadow-[0_4px_24px_rgba(42,28,20,0.08)] ${isSplit ? "w-full" : "w-[1320px]"}`}
     >
       <BoardTableBackground centered={!isSplit} />
       <div className="relative z-10">
@@ -230,7 +233,6 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
           height: DESIGN_HEIGHT,
           transform: `scale(${scale})`,
           transformOrigin: "center center",
-          fontFamily: '"Noto Serif KR", "Batang", "Times New Roman", serif',
           color: BROWN,
         }}
       >
@@ -241,7 +243,7 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
         />
 
         <header className="relative z-10 flex shrink-0 flex-col items-center pt-14">
-          <h1 className="text-[54px] font-black tracking-tight">
+          <h1 className={`${TITLE_TEXT} tracking-tight`}>
             {formatBoardTitle(date)}
           </h1>
         </header>
