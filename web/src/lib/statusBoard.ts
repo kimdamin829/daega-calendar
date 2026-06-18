@@ -12,7 +12,7 @@ import { formatBoardDisplayTime, resolveTimeToMinutes } from "@/lib/timeResolve"
 
 export interface BoardEntry {
   time: string;
-  guestName: string;
+  guestNameChars: string[];
   partySize: string;
   partyTier: PartyTier;
   seat: string | null;
@@ -55,16 +55,15 @@ function compareBoardReservations(a: Reservation, b: Reservation): number {
 
 const BOARD_GUEST_NAME_MAX = 6;
 
-function formatBoardGuestName(raw: string): string {
+function formatBoardGuestName(raw: string): string[] {
   const masked = maskGuestName(raw);
-  const chars = [...masked];
-  return chars.slice(0, BOARD_GUEST_NAME_MAX).join("");
+  return [...masked].slice(0, BOARD_GUEST_NAME_MAX);
 }
 
 function toBoardEntry(reservation: Reservation): BoardEntry {
   return {
     time: formatBoardDisplayTime(reservation.time),
-    guestName: formatBoardGuestName(reservation.guest_name),
+    guestNameChars: formatBoardGuestName(reservation.guest_name),
     partySize: formatBoardPartyLabel(reservation),
     partyTier: getPartyTier(reservation),
     seat: reservation.seat,

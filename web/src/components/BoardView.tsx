@@ -12,11 +12,12 @@ const HEADER_BG = "#ebe3d6";
 const FRAME_BORDER = "#c4a882";
 
 const GRID_COLS =
-  "grid-cols-[minmax(0,0.9fr)_minmax(0,1.5fr)_minmax(0,1.25fr)_minmax(0,1.15fr)]";
-const BOARD_FONT = "font-extrabold";
+  "grid-cols-[minmax(0,0.78fr)_minmax(0,1.85fr)_minmax(0,1.15fr)_minmax(0,1.1fr)]";
+const BOARD_FONT = "font-bold";
 const HEADER_TEXT = `text-[38px] ${BOARD_FONT}`;
 const CELL_TEXT = `text-[48px] ${BOARD_FONT}`;
 const TITLE_TEXT = `text-[62px] ${BOARD_FONT}`;
+const NAME_SPACED_CHARS = "inline-flex items-baseline justify-center gap-x-[0.14em]";
 const ROW_CLASS = `grid ${GRID_COLS} min-h-[78px] items-center px-10 text-center`;
 const COLUMN_CLASS = "min-w-0 flex-1";
 const SUFFIX_TEXT = HEADER_TEXT;
@@ -123,8 +124,12 @@ function BoardTableRow({
   return (
     <div className={`${ROW_CLASS} ${className}`} style={{ color: BROWN }}>
       <span className={`${CELL_TEXT} tabular-nums`}>{entry.time}</span>
-      <span className={CELL_TEXT}>
-        {entry.guestName}
+      <span className={`${CELL_TEXT} inline-flex items-baseline justify-center`}>
+        <span className={NAME_SPACED_CHARS}>
+          {entry.guestNameChars.map((char, index) => (
+            <span key={`${char}-${index}`}>{char}</span>
+          ))}
+        </span>
         <span className={SUFFIX_TEXT}>님</span>
       </span>
       <BoardPartyLabel partySize={entry.partySize} partyTier={entry.partyTier} />
