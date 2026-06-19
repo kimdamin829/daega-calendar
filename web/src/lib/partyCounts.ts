@@ -1,7 +1,13 @@
+export type PartySeparator = "." | "," | "&";
+
 export interface PartyCounts {
   adult_count: number;
   child_count: number;
   infant_count: number;
+}
+
+export interface ParsedPartyCounts extends PartyCounts {
+  party_separator: PartySeparator | null;
 }
 
 export type PartyTier = 1 | 2 | 3;
@@ -28,12 +34,14 @@ export function getPartyTier(counts: PartyCounts): PartyTier {
   return 1;
 }
 
-/** 4 / 4명 / 10.2 / 10&1 / 10.2,1 / 10.2.1명 → adult·child·infant */
-export function parsePartyCounts(raw: string): PartyCounts {
+/** 4 / 4명 / 10.2 / 10&1 / 10.2,1 / 10.2.1명 → adult·child·infant + 구분자 */
+export function parsePartyCounts(raw: string): ParsedPartyCounts {
   const cleaned = raw.replace(/명$/, "").trim();
   if (!cleaned) {
     throw new PartyCountParseError(PARTY_PARSE_HINT);
   }
+
+  const party_separator = detectPartySeparator(cleaned);
 
   const segments = cleaned.split(/[.,&]+/);
   if (segments.length > 3) {
@@ -55,14 +63,22 @@ export function parsePartyCounts(raw: string): PartyCounts {
     throw new PartyCountParseError("인원수는 1명 이상이어야 합니다.");
   }
 
-  return { adult_count, child_count, infant_count };
+  return { adult_count, child_count, infant_count, party_separator };
+}
+
+function detectPartySeparator(raw: string): PartySeparator | null {
+  const match = raw.match(/[.,&]/);
+  return match ? (match[0] as PartySeparator) : null;
 }
 
 export function shouldShowPartyLabel(counts: PartyCounts): boolean {
   return counts.child_count > 0 || counts.infant_count > 0 || counts.adult_count > 1;
 }
 
-export function formatPartyLabel(counts: PartyCounts): string {
+export function formatPartyLabel(
+  counts: PartyCounts,
+  separator: PartySeparator | null = ".",
+): string {
   if (counts.child_count === 0 && counts.infant_count === 0) {
     return `${counts.adult_count}명`;
   }
@@ -72,17 +88,22 @@ export function formatPartyLabel(counts: PartyCounts): string {
     parts.push(counts.infant_count);
   }
 
-  return `${parts.join(".")}명`;
+  const sep = separator ?? ".";
+  return `${parts.join(sep)}명`;
 }
 
-/** 현황판용 — "명" 없이 성인·소인·유아를 &로 구분 (예: 10, 10&1, 10&2&1) */
-export function formatBoardPartyLabel(counts: PartyCounts): string {
+/** 현황판용 — 성인·소인·유아 숫자 배열 (표시 시 &로 연결) */
+export function getBoardPartyParts(counts: PartyCounts): string[] {
   const tier = getPartyTier(counts);
   if (tier === 3) {
-    return `${counts.adult_count}&${counts.child_count}&${counts.infant_count}`;
+    return [
+      String(counts.adult_count),
+      String(counts.child_count),
+      String(counts.infant_count),
+    ];
   }
   if (tier === 2) {
-    return `${counts.adult_count}&${counts.child_count}`;
+    return [String(counts.adult_count), String(counts.child_count)];
   }
-  return String(counts.adult_count);
+  return [String(counts.adult_count)];
 }

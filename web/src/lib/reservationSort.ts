@@ -1,10 +1,10 @@
 import type { Reservation } from "@/types/reservation";
-import { PLACEHOLDER_TIME } from "@/lib/reservationConstants";
+import { hasRealReservationTime } from "@/lib/reservationConstants";
 import { isUnparsedDraft } from "@/lib/reservationDisplay";
 import { resolveTimeToMinutes } from "@/lib/timeResolve";
 
 function getReservationSortMinutes(reservation: Reservation): number {
-  if (isUnparsedDraft(reservation) || reservation.time === PLACEHOLDER_TIME) {
+  if (isUnparsedDraft(reservation) || !hasRealReservationTime(reservation.time)) {
     return reservation.start_minutes;
   }
 

@@ -1,6 +1,9 @@
-import { formatReservationLine, formatTime } from "@/lib/formatReservation";
-import { formatPartyLabel, shouldShowPartyLabel } from "@/lib/partyCounts";
-import { PLACEHOLDER_GUEST, PLACEHOLDER_TIME } from "@/lib/reservationConstants";
+import type { ReservationDisplaySource } from "@/types/reservation";
+import { formatReservationLine } from "@/lib/formatReservation";
+import {
+  hasRealReservationTime,
+  PLACEHOLDER_GUEST,
+} from "@/lib/reservationConstants";
 
 export function isPlaceholderReservation(reservation: { guest_name: string }): boolean {
   return !reservation.guest_name || reservation.guest_name === PLACEHOLDER_GUEST;
@@ -20,7 +23,7 @@ export function isOrphanPlaceholder(reservation: {
   return (
     isPlaceholderReservation(reservation) &&
     !isUnparsedDraft(reservation) &&
-    reservation.time === PLACEHOLDER_TIME
+    !hasRealReservationTime(reservation.time)
   );
 }
 
@@ -32,42 +35,15 @@ export function shouldShowOnDayTimeline(
   if (reservation.id === editingId) return true;
   if (isUnparsedDraft(reservation)) return true;
   if (!isPlaceholderReservation(reservation)) return true;
-  if (reservation.time !== PLACEHOLDER_TIME) return true;
-  return false;
+  return hasRealReservationTime(reservation.time);
 }
 
-function formatPartialReservationLine(reservation: {
-  time: string;
-  adult_count: number;
-  child_count: number;
-  infant_count: number;
-}): string {
-  const parts: string[] = [];
-
-  if (reservation.time !== PLACEHOLDER_TIME) {
-    parts.push(formatTime(reservation.time));
-  }
-  if (shouldShowPartyLabel(reservation)) {
-    parts.push(formatPartyLabel(reservation));
-  }
-
-  return parts.join(" ");
-}
-
-export function formatReservationDisplay(reservation: {
-  time: string;
-  adult_count: number;
-  child_count: number;
-  infant_count: number;
-  guest_name: string;
-  seat: string | null;
-  memo: string | null;
-}): string {
+export function formatReservationDisplay(reservation: ReservationDisplaySource): string {
   if (isUnparsedDraft(reservation)) {
     return reservation.memo ?? "";
   }
   if (isPlaceholderReservation(reservation)) {
-    return formatPartialReservationLine(reservation);
+    return formatReservationLine({ ...reservation, guest_name: "", seat: null, memo: null });
   }
   return formatReservationLine(reservation);
 }

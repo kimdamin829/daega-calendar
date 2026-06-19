@@ -1,6 +1,6 @@
 import type { Reservation } from "@/types/reservation";
 import type { ReservationColor } from "@/lib/reservationColors";
-import { PLACEHOLDER_TIME } from "@/lib/reservationConstants";
+import { hasRealReservationTime } from "@/lib/reservationConstants";
 import {
   formatReservationDisplay,
   isUnparsedDraft,
@@ -19,7 +19,7 @@ export interface DaySummary {
 export const EMPTY_DAY_SUMMARY: DaySummary = { previews: [] };
 
 function shouldShowInMonthPreview(reservation: Reservation): boolean {
-  return isUnparsedDraft(reservation) || reservation.time !== PLACEHOLDER_TIME;
+  return isUnparsedDraft(reservation) || hasRealReservationTime(reservation.time);
 }
 
 function buildMonthPreviews(reservations: Reservation[]): MonthPreview[] {

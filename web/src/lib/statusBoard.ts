@@ -1,9 +1,9 @@
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import type { Reservation } from "@/types/reservation";
-import { PLACEHOLDER_TIME } from "@/lib/reservationConstants";
+import { hasRealReservationTime } from "@/lib/reservationConstants";
 import { maskGuestName } from "@/lib/maskGuestName";
-import { formatBoardPartyLabel, getPartyTier, type PartyTier } from "@/lib/partyCounts";
+import { getBoardPartyParts } from "@/lib/partyCounts";
 import {
   isPlaceholderReservation,
   isUnparsedDraft,
@@ -13,8 +13,7 @@ import { formatBoardDisplayTime, resolveTimeToMinutes } from "@/lib/timeResolve"
 export interface BoardEntry {
   time: string;
   guestNameChars: string[];
-  partySize: string;
-  partyTier: PartyTier;
+  partyParts: string[];
   seat: string | null;
 }
 
@@ -36,7 +35,7 @@ function isEligibleForBoard(reservation: Reservation): boolean {
   if (reservation.color === "gray") return false;
   if (isPlaceholderReservation(reservation)) return false;
   if (isUnparsedDraft(reservation)) return false;
-  if (reservation.time === PLACEHOLDER_TIME) return false;
+  if (!hasRealReservationTime(reservation.time)) return false;
   return true;
 }
 
@@ -64,8 +63,7 @@ function toBoardEntry(reservation: Reservation): BoardEntry {
   return {
     time: formatBoardDisplayTime(reservation.time),
     guestNameChars: formatBoardGuestName(reservation.guest_name),
-    partySize: formatBoardPartyLabel(reservation),
-    partyTier: getPartyTier(reservation),
+    partyParts: getBoardPartyParts(reservation),
     seat: reservation.seat,
   };
 }

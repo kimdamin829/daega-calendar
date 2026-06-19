@@ -1,5 +1,5 @@
 import type { ReservationColor } from "@/lib/reservationColors";
-import type { PartyCounts } from "@/lib/partyCounts";
+import type { PartyCounts, PartySeparator } from "@/lib/partyCounts";
 
 export interface Reservation extends PartyCounts {
   id: string;
@@ -8,6 +8,7 @@ export interface Reservation extends PartyCounts {
   guest_name: string;
   seat: string | null;
   memo: string | null;
+  party_separator: PartySeparator | null;
   start_minutes: number;
   duration_minutes: number;
   color: ReservationColor | null;
@@ -21,6 +22,7 @@ export interface ReservationContent extends PartyCounts {
   guest_name: string;
   seat: string | null;
   memo: string | null;
+  party_separator: PartySeparator | null;
 }
 
 export interface ReservationInput extends ReservationContent {
@@ -33,3 +35,20 @@ export interface ReservationPositionUpdate {
   start_minutes: number;
   duration_minutes: number;
 }
+
+export type ReservationDisplaySource = Pick<
+  Reservation,
+  | "time"
+  | "adult_count"
+  | "child_count"
+  | "infant_count"
+  | "party_separator"
+  | "guest_name"
+  | "seat"
+  | "memo"
+>;
+
+export type ReservationContentPayload = Omit<
+  Reservation,
+  "id" | "date" | "created_at" | "updated_at"
+>;

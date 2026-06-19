@@ -1,8 +1,6 @@
-import type { PartyCounts } from "@/lib/partyCounts";
+import type { ReservationDisplaySource } from "@/types/reservation";
 import { formatPartyLabel, shouldShowPartyLabel } from "@/lib/partyCounts";
-import { PLACEHOLDER_TIME } from "@/lib/reservationConstants";
-
-export { PLACEHOLDER_TIME } from "@/lib/reservationConstants";
+import { hasRealReservationTime } from "@/lib/reservationConstants";
 
 export function formatTime(time: string): string {
   const [hourStr, minuteStr] = time.split(":");
@@ -12,31 +10,20 @@ export function formatTime(time: string): string {
   return `${hour}:${String(minute).padStart(2, "0")}`;
 }
 
-function hasRealTime(time: string): boolean {
-  return time !== PLACEHOLDER_TIME;
-}
-
-export function formatReservationLine(
-  reservation: PartyCounts & {
-    time: string;
-    guest_name: string;
-    seat: string | null;
-    memo: string | null;
-  },
-): string {
+export function formatReservationLine(reservation: ReservationDisplaySource): string {
   const segments: string[] = [];
 
-  if (hasRealTime(reservation.time)) {
+  if (hasRealReservationTime(reservation.time)) {
     segments.push(formatTime(reservation.time));
   }
 
   if (reservation.guest_name) {
     if (shouldShowPartyLabel(reservation)) {
-      segments.push(formatPartyLabel(reservation));
+      segments.push(formatPartyLabel(reservation, reservation.party_separator));
     }
     segments.push(reservation.guest_name);
   } else if (shouldShowPartyLabel(reservation)) {
-    segments.push(formatPartyLabel(reservation));
+    segments.push(formatPartyLabel(reservation, reservation.party_separator));
   }
 
   const base = segments.join(" ");

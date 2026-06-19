@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import type { Reservation } from "@/types/reservation";
 import type { BlockLayout } from "@/lib/overlapLayout";
 import { durationToHeight, minutesToY } from "@/lib/dayGrid";
@@ -49,9 +49,10 @@ export function ReservationBlock({
   const touchLongPressReady = useRef(false);
   const longPressTimerRef = useRef<number | null>(null);
   const colorStyles = getColorStyles(reservation.color);
-  const displayText = isEditing
-    ? liveText
-    : formatReservationDisplay(reservation);
+  const displayText = useMemo(
+    () => (isEditing ? liveText : formatReservationDisplay(reservation)),
+    [isEditing, liveText, reservation],
+  );
 
   const visualOffsetY = isDragging ? dragOffsetY : isRepositioning ? repositionOffsetY : 0;
   const top = minutesToY(reservation.start_minutes, hourHeight);

@@ -2,3 +2,7 @@
 export const PLACEHOLDER_TIME = "00:00:00";
 
 export const PLACEHOLDER_GUEST = "새 예약";
+
+export function hasRealReservationTime(time: string): boolean {
+  return time !== PLACEHOLDER_TIME;
+}

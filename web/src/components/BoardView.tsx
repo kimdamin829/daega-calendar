@@ -91,12 +91,12 @@ function BoardSplitDivider() {
   );
 }
 
-function BoardPartyLabel({ partySize, partyTier }: { partySize: string; partyTier: PartyTier }) {
-  const parts = partySize.split("&");
+function BoardPartyLabel({ partyParts }: { partyParts: string[] }) {
+  const partyTier = partyParts.length as PartyTier;
 
   return (
     <span className={BOARD_FONT}>
-      {parts.map((part, index) => (
+      {partyParts.map((part, index) => (
         <span key={index}>
           {index > 0 && <span className={SUFFIX_TEXT}>&</span>}
           <span className={PARTY_TEXT[partyTier]}>{part}</span>
@@ -132,7 +132,7 @@ function BoardTableRow({
         </span>
         <span className={SUFFIX_TEXT}>님</span>
       </span>
-      <BoardPartyLabel partySize={entry.partySize} partyTier={entry.partyTier} />
+      <BoardPartyLabel partyParts={entry.partyParts} />
       <span className={`${seatSize} ${BOARD_FONT} break-all`}>{seatLabel}</span>
     </div>
   );
