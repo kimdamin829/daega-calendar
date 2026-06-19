@@ -2,8 +2,8 @@ export type ReservationColor = "sky" | "yellow" | "green" | "pink" | "purple" | 
 
 const TEXT = "text-[#2a1c14]";
 
-const SKY_CHIP = `bg-[#78ace5] ${TEXT}`;
-const SKY_BLOCK = `border-[#5a94d0] bg-[#78ace5] ${TEXT}`;
+const SKY_CHIP = `bg-[#88b8eb] ${TEXT}`;
+const SKY_BLOCK = `border-[#6aa0d6] bg-[#88b8eb] ${TEXT}`;
 
 const DEFAULT_COLOR_STYLE = {
   block: SKY_BLOCK,
@@ -13,8 +13,8 @@ const DEFAULT_COLOR_STYLE = {
 export const NO_COLOR_SWATCH = {
   id: null,
   label: "기본",
-  swatch: "bg-[#78ace5]",
-  ring: "ring-[#5a94d0]",
+  swatch: "bg-[#88b8eb]",
+  ring: "ring-[#6aa0d6]",
 } as const;
 
 export const RESERVATION_COLORS: {
@@ -28,34 +28,34 @@ export const RESERVATION_COLORS: {
   {
     id: "yellow",
     label: "노랑",
-    block: `border-[#d8b35a] bg-[#f2cd74] ${TEXT}`,
-    chip: `bg-[#f2cd74] ${TEXT}`,
-    swatch: "bg-[#f2cd74]",
-    ring: "ring-[#d8b35a]",
+    block: `border-[#e0be68] bg-[#f5d684] ${TEXT}`,
+    chip: `bg-[#f5d684] ${TEXT}`,
+    swatch: "bg-[#f5d684]",
+    ring: "ring-[#e0be68]",
   },
   {
     id: "green",
     label: "초록",
-    block: `border-[#4f7f58] bg-[#62976b] ${TEXT}`,
-    chip: `bg-[#62976b] ${TEXT}`,
-    swatch: "bg-[#62976b]",
-    ring: "ring-[#4f7f58]",
+    block: `border-[#6fa87a] bg-[#80b28a] ${TEXT}`,
+    chip: `bg-[#80b28a] ${TEXT}`,
+    swatch: "bg-[#80b28a]",
+    ring: "ring-[#6fa87a]",
   },
   {
     id: "pink",
     label: "분홍",
-    block: `border-[#c87f75] bg-[#e19b91] ${TEXT}`,
-    chip: `bg-[#e19b91] ${TEXT}`,
-    swatch: "bg-[#e19b91]",
-    ring: "ring-[#c87f75]",
+    block: `border-[#d08d83] bg-[#e8a99f] ${TEXT}`,
+    chip: `bg-[#e8a99f] ${TEXT}`,
+    swatch: "bg-[#e8a99f]",
+    ring: "ring-[#d08d83]",
   },
   {
     id: "purple",
     label: "보라",
-    block: `border-[#824a98] bg-[#9b5db3] ${TEXT}`,
-    chip: `bg-[#9b5db3] ${TEXT}`,
-    swatch: "bg-[#9b5db3]",
-    ring: "ring-[#824a98]",
+    block: `border-[#9058a6] bg-[#a86bbd] ${TEXT}`,
+    chip: `bg-[#a86bbd] ${TEXT}`,
+    swatch: "bg-[#a86bbd]",
+    ring: "ring-[#9058a6]",
   },
   {
     id: "gray",
