@@ -1,7 +1,9 @@
 export type ReservationColor = "sky" | "yellow" | "green" | "pink" | "purple" | "gray";
 
-const SKY_CHIP = "bg-sky-400 text-sky-950";
-const SKY_BLOCK = `border-sky-600 ${SKY_CHIP}`;
+const TEXT = "text-[#2a1c14]";
+
+const SKY_CHIP = `bg-[#78ace5] ${TEXT}`;
+const SKY_BLOCK = `border-[#5a94d0] bg-[#78ace5] ${TEXT}`;
 
 const DEFAULT_COLOR_STYLE = {
   block: SKY_BLOCK,
@@ -11,8 +13,8 @@ const DEFAULT_COLOR_STYLE = {
 export const NO_COLOR_SWATCH = {
   id: null,
   label: "기본",
-  swatch: "bg-sky-400",
-  ring: "ring-sky-400",
+  swatch: "bg-[#78ace5]",
+  ring: "ring-[#5a94d0]",
 } as const;
 
 export const RESERVATION_COLORS: {
@@ -26,34 +28,34 @@ export const RESERVATION_COLORS: {
   {
     id: "yellow",
     label: "노랑",
-    block: "border-yellow-600 bg-yellow-400 text-yellow-950",
-    chip: "bg-yellow-400 text-yellow-950",
-    swatch: "bg-yellow-400",
-    ring: "ring-yellow-500",
+    block: `border-[#d8b35a] bg-[#f2cd74] ${TEXT}`,
+    chip: `bg-[#f2cd74] ${TEXT}`,
+    swatch: "bg-[#f2cd74]",
+    ring: "ring-[#d8b35a]",
   },
   {
     id: "green",
     label: "초록",
-    block: "border-green-600 bg-green-400 text-green-950",
-    chip: "bg-green-400 text-green-950",
-    swatch: "bg-green-500",
-    ring: "ring-green-500",
+    block: `border-[#4f7f58] bg-[#62976b] ${TEXT}`,
+    chip: `bg-[#62976b] ${TEXT}`,
+    swatch: "bg-[#62976b]",
+    ring: "ring-[#4f7f58]",
   },
   {
     id: "pink",
-    label: "주황",
-    block: "border-orange-600 bg-orange-400 text-orange-950",
-    chip: "bg-orange-400 text-orange-950",
-    swatch: "bg-orange-400",
-    ring: "ring-orange-500",
+    label: "분홍",
+    block: `border-[#c87f75] bg-[#e19b91] ${TEXT}`,
+    chip: `bg-[#e19b91] ${TEXT}`,
+    swatch: "bg-[#e19b91]",
+    ring: "ring-[#c87f75]",
   },
   {
     id: "purple",
     label: "보라",
-    block: "border-purple-600 bg-purple-400 text-purple-950",
-    chip: "bg-purple-400 text-purple-950",
-    swatch: "bg-purple-500",
-    ring: "ring-purple-500",
+    block: `border-[#824a98] bg-[#9b5db3] ${TEXT}`,
+    chip: `bg-[#9b5db3] ${TEXT}`,
+    swatch: "bg-[#9b5db3]",
+    ring: "ring-[#824a98]",
   },
   {
     id: "gray",
