@@ -58,8 +58,8 @@ export const RESERVATION_COLORS: {
   {
     id: "gray",
     label: "회색",
-    block: "border-gray-700 bg-gray-500 text-gray-950",
-    chip: "bg-gray-500 text-gray-950",
+    block: "border-gray-600 bg-gray-400 text-gray-950",
+    chip: "bg-gray-400 text-gray-950",
     swatch: "bg-gray-400",
     ring: "ring-gray-400",
   },
