@@ -1,22 +1,7 @@
-import { useEffect, useMemo } from "react";
-import { koreaDateKeyToDate } from "@/lib/dateUtils";
 import { buildStatusBoard } from "@/lib/statusBoard";
-import { summarizeReservationsByDate } from "@/lib/monthSummary";
-import { pushWidgetMonthSummaries } from "@/lib/widgetBridge";
-import { useReservationLoader } from "@/hooks/useReservationLoader";
+import { useStatusDisplayReservations } from "@/hooks/useStatusDisplayReservations";
 
 export function useBoardReservations(dateKey: string) {
-  const { reservations, error, hasLoaded } = useReservationLoader(dateKey, dateKey);
-  const board = useMemo(() => buildStatusBoard(reservations), [reservations]);
-
-  useEffect(() => {
-    if (!hasLoaded) return;
-    const month = koreaDateKeyToDate(dateKey);
-    pushWidgetMonthSummaries(month, summarizeReservationsByDate(reservations), {
-      merge: true,
-      allowEmpty: true,
-    });
-  }, [dateKey, hasLoaded, reservations]);
-
+  const { data: board, error } = useStatusDisplayReservations(dateKey, buildStatusBoard);
   return { board, error };
 }

@@ -20,6 +20,20 @@ export default defineConfig({
         background_color: "#ffffff",
         display: "standalone",
         start_url: "/",
+        shortcuts: [
+          {
+            name: "오늘 예약 요약",
+            short_name: "오늘",
+            url: "/?today",
+            icons: [
+              {
+                src: "favicon.svg",
+                sizes: "any",
+                type: "image/svg+xml",
+              },
+            ],
+          },
+        ],
         icons: [
           {
             src: "favicon.svg",

@@ -6,7 +6,9 @@ import { MonthCalendar } from "@/components/MonthCalendar";
 import { MonthPickerBar } from "@/components/MonthPickerBar";
 import { MonthViewHeader } from "@/components/MonthViewHeader";
 import { SetupNotice } from "@/components/SetupNotice";
+import { TodayView } from "@/components/TodayView";
 import { useBoardReservations } from "@/hooks/useBoardReservations";
+import { useTodayReservations } from "@/hooks/useTodayReservations";
 import { useReservations } from "@/hooks/useReservations";
 import { useKoreaToday } from "@/hooks/useTodayDate";
 import { parseDateParam, syncMonthToDate } from "@/lib/dateUtils";
@@ -15,8 +17,20 @@ import {
   readUrlState,
   syncBoardUrl,
   syncCalendarUrl,
+  syncTodayUrl,
   type ViewMode,
 } from "@/lib/urlState";
+
+function TodayApp() {
+  const { date, dateKey } = useKoreaToday();
+  const { summary, error } = useTodayReservations(dateKey);
+
+  useEffect(() => {
+    syncTodayUrl();
+  }, []);
+
+  return <TodayView date={date} summary={summary} error={error} />;
+}
 
 function BoardApp() {
   const { date, dateKey } = useKoreaToday();
@@ -131,6 +145,9 @@ export default function App() {
   }
 
   const { selectedDate, view } = readUrlState();
+  if (view === "today") {
+    return <TodayApp />;
+  }
   if (view === "board") {
     return <BoardApp />;
   }

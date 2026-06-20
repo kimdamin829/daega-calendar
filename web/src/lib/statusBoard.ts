@@ -25,18 +25,30 @@ interface StatusBoardColumns {
 const BOARD_TEAM_LIMIT = 20;
 export const BOARD_COLUMN_SIZE = 10;
 
-export function formatBoardTitle(date: Date): string {
+function formatStatusDateTitle(date: Date, suffix: string): string {
   const dateLabel = format(date, "M월 d일", { locale: ko });
   const weekday = format(date, "EEE", { locale: ko });
-  return `${dateLabel}(${weekday}) 예약 현황`;
+  return `${dateLabel}(${weekday}) ${suffix}`;
 }
 
-function isEligibleForBoard(reservation: Reservation): boolean {
+export function formatBoardTitle(date: Date): string {
+  return formatStatusDateTitle(date, "예약 현황");
+}
+
+export function formatTodayTitle(date: Date): string {
+  return formatStatusDateTitle(date, "예약");
+}
+
+export function isEligibleForStatusDisplay(reservation: Reservation): boolean {
   if (reservation.color === "gray") return false;
   if (isPlaceholderReservation(reservation)) return false;
   if (isUnparsedDraft(reservation)) return false;
   if (!hasRealReservationTime(reservation.time)) return false;
   return true;
+}
+
+function isEligibleForBoard(reservation: Reservation): boolean {
+  return isEligibleForStatusDisplay(reservation);
 }
 
 function compareBoardReservations(a: Reservation, b: Reservation): number {

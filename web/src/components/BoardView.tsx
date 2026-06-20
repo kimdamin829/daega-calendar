@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import type { PartyTier } from "@/lib/partyCounts";
+import { StatusTitleDivider } from "@/components/StatusTitleDivider";
 import { BOARD_COLUMN_SIZE, formatBoardTitle, type BoardEntry } from "@/lib/statusBoard";
+import {
+  STATUS_BROWN,
+  STATUS_CREAM,
+  STATUS_FRAME_BORDER,
+  STATUS_HEADER_BG,
+} from "@/lib/statusDisplayTheme";
 
 const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
 const BG_OPACITY = 0.24;
-
-const CREAM = "#f8f4ee";
-const BROWN = "#2a1c14";
-const HEADER_BG = "#ebe3d6";
-const FRAME_BORDER = "#c4a882";
 
 const GRID_COLS =
   "grid-cols-[minmax(0,0.78fr)_minmax(0,1.85fr)_minmax(0,1.15fr)_minmax(0,1.1fr)]";
@@ -40,19 +42,6 @@ interface BoardViewProps {
   error: string | null;
 }
 
-function TitleDivider() {
-  return (
-    <div className="flex shrink-0 items-center justify-center px-32 pb-5">
-      <div className="h-px flex-1" style={{ backgroundColor: FRAME_BORDER }} />
-      <div
-        className="mx-4 h-2 w-2 rotate-45"
-        style={{ backgroundColor: FRAME_BORDER }}
-      />
-      <div className="h-px flex-1" style={{ backgroundColor: FRAME_BORDER }} />
-    </div>
-  );
-}
-
 function BoardTableBackground({ centered }: { centered: boolean }) {
   return (
     <>
@@ -72,7 +61,7 @@ function BoardTableHeader({ className = "" }: { className?: string }) {
   return (
     <div
       className={`grid ${GRID_COLS} px-10 py-4 text-center ${HEADER_TEXT} tracking-wide ${className}`}
-      style={{ backgroundColor: HEADER_BG, color: BROWN }}
+      style={{ backgroundColor: STATUS_HEADER_BG, color: STATUS_BROWN }}
     >
       {HEADER_LABELS.map((label) => (
         <span key={label}>{label}</span>
@@ -86,7 +75,7 @@ function BoardSplitDivider() {
     <div
       aria-hidden
       className="pointer-events-none absolute top-0 bottom-0 left-1/2 w-[2px] -translate-x-1/2"
-      style={{ backgroundColor: FRAME_BORDER }}
+      style={{ backgroundColor: STATUS_FRAME_BORDER }}
     />
   );
 }
@@ -122,7 +111,7 @@ function BoardTableRow({
   const seatSize = seatLabel.length > 6 ? "text-[42px]" : "text-[48px]";
 
   return (
-    <div className={`${ROW_CLASS} ${className}`} style={{ color: BROWN }}>
+    <div className={`${ROW_CLASS} ${className}`} style={{ color: STATUS_BROWN }}>
       <span className={`${CELL_TEXT} tabular-nums`}>{entry.time}</span>
       <span className={`${CELL_TEXT} inline-flex items-baseline justify-center`}>
         <span className={NAME_SPACED_CHARS}>
@@ -229,7 +218,7 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
     <div
       ref={containerRef}
       className="flex h-dvh w-full items-center justify-center overflow-hidden"
-      style={{ backgroundColor: CREAM }}
+      style={{ backgroundColor: STATUS_CREAM }}
     >
       <div
         className="relative flex shrink-0 flex-col"
@@ -238,13 +227,13 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
           height: DESIGN_HEIGHT,
           transform: `scale(${scale})`,
           transformOrigin: "center center",
-          color: BROWN,
+          color: STATUS_BROWN,
         }}
       >
         <div
           aria-hidden
           className="pointer-events-none absolute inset-6 rounded-sm border"
-          style={{ borderColor: FRAME_BORDER }}
+          style={{ borderColor: STATUS_FRAME_BORDER }}
         />
 
         <header className="relative z-10 flex shrink-0 flex-col items-center pt-14">
@@ -253,7 +242,7 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
           </h1>
         </header>
 
-        <TitleDivider />
+        <StatusTitleDivider />
 
         <main className="relative z-10 mx-auto -mt-2 w-full shrink-0 px-12">
           <div className="flex w-full justify-center">
