@@ -7,7 +7,7 @@ export function StatusTitleDivider({ variant = "board" }: { variant?: "board" | 
     <div
       className={
         compact
-          ? "flex items-center justify-center px-8 py-4"
+          ? "flex shrink-0 items-center justify-center px-8 py-4"
           : "flex shrink-0 items-center justify-center px-32 pb-5"
       }
     >
