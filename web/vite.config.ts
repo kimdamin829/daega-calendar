@@ -24,7 +24,7 @@ export default defineConfig({
           {
             name: "오늘 예약 요약",
             short_name: "오늘",
-            url: "/?today",
+            url: "/today",
             icons: [
               {
                 src: "favicon.svg",
