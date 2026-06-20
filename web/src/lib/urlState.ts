@@ -5,20 +5,17 @@ export type ViewMode = "month" | "day" | "board" | "today";
 export const TODAY_PATH = "/today";
 
 function normalizePathname(pathname: string): string {
-  if (!pathname || pathname === "/") return "/";
   return pathname.replace(/\/+$/, "") || "/";
 }
 
 export function isTodayRoute(): boolean {
-  const pathname = normalizePathname(window.location.pathname);
-  if (pathname === TODAY_PATH) return true;
-  return new URLSearchParams(window.location.search).has("today");
+  return normalizePathname(window.location.pathname) === TODAY_PATH;
 }
 
-/** iOS 홈 화면 추가 시 쿼리가 빠지는 경우가 있어 경로 기반(/today)으로 통일 */
+/** 구형 ?today 북마크 → /today */
 export function normalizeTodayRoute(): void {
-  if (!isTodayRoute()) return;
-  if (normalizePathname(window.location.pathname) === TODAY_PATH) return;
+  if (isTodayRoute()) return;
+  if (!new URLSearchParams(window.location.search).has("today")) return;
   window.history.replaceState(null, "", TODAY_PATH);
 }
 
@@ -30,11 +27,7 @@ export function readUrlState(): { selectedDate: Date; view: ViewMode } {
   const params = new URLSearchParams(window.location.search);
   const viewParam = params.get("view");
   const view: ViewMode =
-    viewParam === "day"
-      ? "day"
-      : viewParam === "board"
-        ? "board"
-        : "month";
+    viewParam === "day" ? "day" : viewParam === "board" ? "board" : "month";
   const selectedDate = parseDateParam(params.get("date")) ?? getKoreaTodayDate();
   return { selectedDate, view };
 }

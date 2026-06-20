@@ -7,12 +7,13 @@ import { MonthPickerBar } from "@/components/MonthPickerBar";
 import { MonthViewHeader } from "@/components/MonthViewHeader";
 import { SetupNotice } from "@/components/SetupNotice";
 import { TodayView } from "@/components/TodayView";
-import { useBoardReservations } from "@/hooks/useBoardReservations";
-import { useTodayReservations } from "@/hooks/useTodayReservations";
+import { useStatusDisplayReservations } from "@/hooks/useStatusDisplayReservations";
 import { useReservations } from "@/hooks/useReservations";
 import { useKoreaToday } from "@/hooks/useTodayDate";
 import { parseDateParam, syncMonthToDate } from "@/lib/dateUtils";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { buildStatusBoard } from "@/lib/statusBoard";
+import { buildTodaySummary } from "@/lib/todaySummary";
 import {
   readUrlState,
   syncBoardUrl,
@@ -23,7 +24,7 @@ import {
 
 function TodayApp() {
   const { date, dateKey } = useKoreaToday();
-  const { summary, error } = useTodayReservations(dateKey);
+  const { data: summary, error } = useStatusDisplayReservations(dateKey, buildTodaySummary);
 
   useEffect(() => {
     syncTodayUrl();
@@ -34,7 +35,7 @@ function TodayApp() {
 
 function BoardApp() {
   const { date, dateKey } = useKoreaToday();
-  const { board, error } = useBoardReservations(dateKey);
+  const { data: board, error } = useStatusDisplayReservations(dateKey, buildStatusBoard);
 
   useEffect(() => {
     syncBoardUrl();

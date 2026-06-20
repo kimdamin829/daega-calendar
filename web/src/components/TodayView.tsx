@@ -22,6 +22,15 @@ interface TodayViewProps {
   error: string | null;
 }
 
+function CountWithUnit({ value, unit }: { value: number; unit: string }) {
+  return (
+    <span className="text-2xl font-bold tabular-nums">
+      {value}
+      <span className="text-lg">{unit}</span>
+    </span>
+  );
+}
+
 function PeriodSummaryCard({
   label,
   teamCount,
@@ -43,13 +52,11 @@ function PeriodSummaryCard({
         {label}
       </div>
       <div className="grid grid-cols-2 gap-2 bg-white px-3 py-4">
-        <p className="text-center text-2xl font-bold tabular-nums whitespace-nowrap">
-          {teamCount}
-          <span className="ml-0.5 text-lg">팀</span>
+        <p className="text-center whitespace-nowrap">
+          <CountWithUnit value={teamCount} unit="팀" />
         </p>
-        <p className="text-center text-2xl font-bold tabular-nums whitespace-nowrap">
-          {guestCount}
-          <span className="ml-0.5 text-lg">명</span>
+        <p className="text-center whitespace-nowrap">
+          <CountWithUnit value={guestCount} unit="명" />
         </p>
       </div>
     </div>
@@ -71,14 +78,8 @@ function TodaySlotRow({
       style={{ color: STATUS_BROWN }}
     >
       <span className="text-2xl tabular-nums">{time}</span>
-      <span className="text-2xl font-bold tabular-nums">
-        {teamCount}
-        <span className="text-lg">팀</span>
-      </span>
-      <span className="text-2xl font-bold tabular-nums">
-        {guestCount}
-        <span className="text-lg">명</span>
-      </span>
+      <CountWithUnit value={teamCount} unit="팀" />
+      <CountWithUnit value={guestCount} unit="명" />
     </div>
   );
 }

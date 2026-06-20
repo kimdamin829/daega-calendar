@@ -1,13 +1,9 @@
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import type { Reservation } from "@/types/reservation";
-import { hasRealReservationTime } from "@/lib/reservationConstants";
+import { isEligibleForStatusDisplay } from "@/lib/statusEligibility";
 import { maskGuestName } from "@/lib/maskGuestName";
 import { getBoardPartyParts } from "@/lib/partyCounts";
-import {
-  isPlaceholderReservation,
-  isUnparsedDraft,
-} from "@/lib/reservationDisplay";
 import { formatBoardDisplayTime, resolveTimeToMinutes } from "@/lib/timeResolve";
 
 export interface BoardEntry {
@@ -37,18 +33,6 @@ export function formatBoardTitle(date: Date): string {
 
 export function formatTodayTitle(date: Date): string {
   return formatStatusDateTitle(date, "예약");
-}
-
-export function isEligibleForStatusDisplay(reservation: Reservation): boolean {
-  if (reservation.color === "gray") return false;
-  if (isPlaceholderReservation(reservation)) return false;
-  if (isUnparsedDraft(reservation)) return false;
-  if (!hasRealReservationTime(reservation.time)) return false;
-  return true;
-}
-
-function isEligibleForBoard(reservation: Reservation): boolean {
-  return isEligibleForStatusDisplay(reservation);
 }
 
 function compareBoardReservations(a: Reservation, b: Reservation): number {
@@ -82,7 +66,7 @@ function toBoardEntry(reservation: Reservation): BoardEntry {
 
 export function buildStatusBoard(reservations: Reservation[]): StatusBoardColumns {
   const entries = reservations
-    .filter(isEligibleForBoard)
+    .filter(isEligibleForStatusDisplay)
     .sort(compareBoardReservations)
     .slice(0, BOARD_TEAM_LIMIT)
     .map(toBoardEntry);

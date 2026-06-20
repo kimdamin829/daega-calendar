@@ -1,5 +1,5 @@
 import type { Reservation } from "@/types/reservation";
-import { isEligibleForStatusDisplay } from "@/lib/statusBoard";
+import { isEligibleForTodaySummary } from "@/lib/statusEligibility";
 import { formatBoardDisplayTime, resolveTimeToMinutes } from "@/lib/timeResolve";
 
 const DINNER_START_MINUTES = 16 * 60;
@@ -39,7 +39,7 @@ export function buildTodaySummary(reservations: Reservation[]): TodaySummary {
   const dinnerSlotMap = new Map<number, TodayTimeSlot>();
 
   for (const reservation of reservations) {
-    if (!isEligibleForStatusDisplay(reservation)) continue;
+    if (!isEligibleForTodaySummary(reservation)) continue;
 
     const timeMinutes = resolveTimeToMinutes(reservation.time);
     const guests = countTodayGuests(reservation);
