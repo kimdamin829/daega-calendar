@@ -125,10 +125,10 @@ function PeriodSlotTable({
 export function TodayView({ date, summary, error }: TodayViewProps) {
   return (
     <div
-      className="flex h-full min-h-0 flex-col overflow-hidden"
+      className="flex min-h-dvh flex-col"
       style={{ backgroundColor: STATUS_CREAM, color: STATUS_BROWN }}
     >
-      <header className="shrink-0 px-5 pt-[max(1.25rem,env(safe-area-inset-top))]">
+      <header className="px-5 pt-[max(1.25rem,env(safe-area-inset-top))]">
         <h1 className="text-center text-2xl font-bold tracking-tight">
           {formatTodayTitle(date)}
         </h1>
@@ -136,7 +136,7 @@ export function TodayView({ date, summary, error }: TodayViewProps) {
 
       <StatusTitleDivider variant="today" />
 
-      <main className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+      <main className="flex flex-col gap-5 px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <div className="flex gap-3">
           {PERIOD_SECTIONS.map(({ key, label }) => (
             <PeriodSummaryCard

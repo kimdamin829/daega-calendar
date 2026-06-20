@@ -55,3 +55,18 @@ body {
   min-height: 0;
   overflow: hidden;
 }
+
+/* /today — 내용 높이만큼 페이지가 늘어나고, 화면 전체 스크롤 */
+html.route-today,
+html.route-today body {
+  height: auto;
+  min-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+html.route-today #root {
+  height: auto;
+  min-height: var(--app-height, 100dvh);
+  overflow: visible;
+}

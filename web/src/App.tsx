@@ -28,6 +28,8 @@ function TodayApp() {
 
   useEffect(() => {
     syncTodayUrl();
+    document.documentElement.classList.add("route-today");
+    return () => document.documentElement.classList.remove("route-today");
   }, []);
 
   return <TodayView date={date} summary={summary} error={error} />;
