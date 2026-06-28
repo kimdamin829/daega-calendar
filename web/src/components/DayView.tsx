@@ -45,7 +45,7 @@ interface DayViewProps {
     startMinutes: number,
     durationMinutes: number,
   ) => Promise<void>;
-  onSaveContent: (draft: Reservation, raw: string) => Promise<void>;
+  onSaveContent: (draft: Reservation, raw: string) => Promise<Reservation>;
   onUpdateColor: (id: string, color: ReservationColor | null) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
   onPreviousDay: () => void;
@@ -891,9 +891,10 @@ export function DayView({
                 value={liveEditText}
                 onChange={setLiveEditText}
                 onSave={async (raw) => {
-                  await onSaveContent(editingReservation, raw);
+                  const saved = await onSaveContent(editingReservation, raw);
                   pendingRef.current = null;
                   setPending(null);
+                  setEditingId(saved.id);
                 }}
                 onDelete={() => handleDelete(editingReservation.id)}
                 onColorChange={(color) => handleColorChange(editingReservation.id, color)}

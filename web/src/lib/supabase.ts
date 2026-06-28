@@ -59,7 +59,7 @@ export async function createReservation(input: ReservationInput): Promise<Reserv
     .single();
 
   if (error) throw error;
-  return data;
+  return normalizeReservationRow(data);
 }
 
 export async function updateReservation(
@@ -76,7 +76,7 @@ export async function updateReservation(
     .single();
 
   if (error) throw error;
-  return data;
+  return normalizeReservationRow(data);
 }
 
 export async function deleteReservation(id: string): Promise<void> {

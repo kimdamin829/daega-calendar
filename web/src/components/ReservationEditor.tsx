@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Reservation } from "@/types/reservation";
 import { isPlaceholderReservation } from "@/lib/reservationDisplay";
 import {
@@ -31,10 +32,14 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
     const [color, setColor] = useState<ReservationColor | null>(reservation.color);
     const [error, setError] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
+    const [deleteConfirm, setDeleteConfirm] = useState(false);
+    const deleteConfirmRef = useRef(false);
+    deleteConfirmRef.current = deleteConfirm;
 
     useEffect(() => {
       setColor(reservation.color);
       setError(null);
+      setDeleteConfirm(false);
     }, [reservation.id, reservation.color]);
 
     useEffect(() => {
@@ -55,8 +60,19 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
       };
     }, [reservation.id]);
 
+    useEffect(() => {
+      if (!deleteConfirm) return;
+
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === "Escape" && !busy) setDeleteConfirm(false);
+      };
+
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [deleteConfirm, busy]);
+
     const dismiss = async () => {
-      if (busy) return;
+      if (busy || deleteConfirm) return;
 
       const trimmed = value.trim();
       setBusy(true);
@@ -76,13 +92,23 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
       }
     };
 
-    useImperativeHandle(ref, () => ({ dismiss }), [value, reservation, busy]);
+    useImperativeHandle(ref, () => ({ dismiss }), [value, reservation, busy, deleteConfirm]);
 
-    const handleDelete = async () => {
+    const handleDeleteClick = () => {
+      if (busy) return;
+      setDeleteConfirm(true);
+      setError(null);
+    };
+
+    const handleDeleteConfirm = async () => {
       if (busy) return;
       setBusy(true);
+      setError(null);
       try {
         await onDelete();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "삭제에 실패했습니다.");
+        setDeleteConfirm(false);
       } finally {
         setBusy(false);
       }
@@ -102,17 +128,67 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
     };
 
     const handleInputBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+      if (deleteConfirm) return;
+
       const related = event.relatedTarget;
       if (related instanceof Node && panelRef.current?.contains(related)) return;
 
       window.setTimeout(() => {
+        if (deleteConfirmRef.current) return;
         if (panelRef.current?.contains(document.activeElement)) return;
         onDismissRequest();
       }, 0);
     };
 
+    const deleteConfirmModal =
+      deleteConfirm &&
+      createPortal(
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 px-6"
+          onClick={() => {
+            if (!busy) setDeleteConfirm(false);
+          }}
+          role="presentation"
+        >
+          <div
+            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+            onClick={(event) => event.stopPropagation()}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-reservation-title"
+          >
+            <p
+              id="delete-reservation-title"
+              className="text-center text-base font-medium text-[#3c4043]"
+            >
+              정말로 삭제하시겠습니까?
+            </p>
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => setDeleteConfirm(false)}
+                className="flex-1 rounded-xl border border-gcal-border py-3 text-base font-medium text-[#3c4043] hover:bg-[#f1f3f4] disabled:opacity-50"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => void handleDeleteConfirm()}
+                className="flex-1 rounded-xl bg-red-600 py-3 text-base font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      );
+
     return (
-      <div ref={panelRef} className="w-full">
+      <>
+        <div ref={panelRef} className="w-full">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <p className="shrink-0 text-base font-medium text-[#3c4043]">예약</p>
@@ -140,7 +216,7 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
             type="button"
             disabled={busy}
             onPointerDown={keepFocus}
-            onClick={() => void handleDelete()}
+            onClick={handleDeleteClick}
             className="shrink-0 text-base text-red-600 hover:text-red-700 disabled:opacity-50"
           >
             삭제
@@ -169,7 +245,9 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
         {error && (
           <p className="mt-4 whitespace-pre-line text-sm text-red-600">{error}</p>
         )}
-      </div>
+        </div>
+        {deleteConfirmModal}
+      </>
     );
   },
 );

@@ -46,7 +46,7 @@ export function useReservations(month: Date, selectedDate: Date) {
   const reservationsRef = useRef(reservations);
   reservationsRef.current = reservations;
 
-  const inflightSavesRef = useRef(new Map<string, Promise<void>>());
+  const inflightSavesRef = useRef(new Map<string, Promise<Reservation>>());
   const lastMountPushAtRef = useRef(0);
   const blockMountPushUntilRef = useRef(0);
   const MOUNT_PUSH_THROTTLE_MS = 10_000;
@@ -118,7 +118,7 @@ export function useReservations(month: Date, selectedDate: Date) {
   );
 
   const saveReservationContent = useCallback(
-    (draft: Reservation, raw: string) => {
+    (draft: Reservation, raw: string): Promise<Reservation> => {
       const ongoing = inflightSavesRef.current.get(draft.id);
       if (ongoing) return ongoing;
 
@@ -142,6 +142,7 @@ export function useReservations(month: Date, selectedDate: Date) {
         const nextAfterSave = replaceDraftInList(base, draft.id, saved);
         setAndPushNow(nextAfterSave, "save:success", saved.date);
         refreshWidgetInBackground();
+        return saved;
       })();
 
       inflightSavesRef.current.set(draft.id, promise);

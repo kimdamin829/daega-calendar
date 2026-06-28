@@ -26,6 +26,7 @@ export interface ReservationContent extends PartyCounts {
 }
 
 export interface ReservationInput extends ReservationContent {
+  id?: string;
   start_minutes: number;
   duration_minutes: number;
   color?: ReservationColor | null;

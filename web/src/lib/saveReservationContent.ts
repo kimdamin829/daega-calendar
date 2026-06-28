@@ -55,11 +55,11 @@ async function persistPayload(
   payload: ReservationContentPayload,
 ): Promise<Reservation> {
   if (existing) {
-    await updateReservation(draft.id, payload);
-    return { ...existing, ...payload };
+    const saved = await updateReservation(draft.id, payload);
+    return saved;
   }
 
-  return createReservation({ date: dateKey, ...payload });
+  return createReservation({ id: draft.id, date: dateKey, ...payload });
 }
 
 /** DB 저장 전 월별뷰·위젯에 바로 반영할 낙관적 예약 */
