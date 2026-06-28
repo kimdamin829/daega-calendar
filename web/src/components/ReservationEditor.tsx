@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Reservation } from "@/types/reservation";
 import { isPlaceholderReservation } from "@/lib/reservationDisplay";
@@ -7,6 +7,19 @@ import {
   isDefaultColor,
   type ReservationColor,
 } from "@/lib/reservationColors";
+
+function readDeleteModalFrame() {
+  const viewport = window.visualViewport;
+  if (!viewport) {
+    return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
+  }
+  return {
+    top: viewport.offsetTop,
+    left: viewport.offsetLeft,
+    width: viewport.width,
+    height: viewport.height,
+  };
+}
 
 export interface ReservationEditorHandle {
   dismiss: () => Promise<void>;
@@ -35,6 +48,14 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
     const [deleteConfirm, setDeleteConfirm] = useState(false);
     const deleteConfirmRef = useRef(false);
     deleteConfirmRef.current = deleteConfirm;
+    const [deleteModalFrame, setDeleteModalFrame] = useState(readDeleteModalFrame);
+
+    const closeDeleteConfirm = useCallback(() => {
+      setDeleteConfirm(false);
+      window.requestAnimationFrame(() => {
+        inputRef.current?.focus({ preventScroll: true });
+      });
+    }, []);
 
     useEffect(() => {
       setColor(reservation.color);
@@ -43,6 +64,8 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
     }, [reservation.id, reservation.color]);
 
     useEffect(() => {
+      if (deleteConfirm) return;
+
       const focusInput = () => {
         const input = inputRef.current;
         if (!input) return;
@@ -58,18 +81,33 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
         window.cancelAnimationFrame(frame);
         window.clearTimeout(timer);
       };
-    }, [reservation.id]);
+    }, [reservation.id, deleteConfirm]);
+
+    useEffect(() => {
+      if (!deleteConfirm) return;
+
+      inputRef.current?.blur();
+
+      const updateFrame = () => setDeleteModalFrame(readDeleteModalFrame());
+      updateFrame();
+      window.visualViewport?.addEventListener("resize", updateFrame);
+      window.visualViewport?.addEventListener("scroll", updateFrame);
+      return () => {
+        window.visualViewport?.removeEventListener("resize", updateFrame);
+        window.visualViewport?.removeEventListener("scroll", updateFrame);
+      };
+    }, [deleteConfirm]);
 
     useEffect(() => {
       if (!deleteConfirm) return;
 
       const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === "Escape" && !busy) setDeleteConfirm(false);
+        if (event.key === "Escape" && !busy) closeDeleteConfirm();
       };
 
       document.addEventListener("keydown", handleKeyDown);
       return () => document.removeEventListener("keydown", handleKeyDown);
-    }, [deleteConfirm, busy]);
+    }, [deleteConfirm, busy, closeDeleteConfirm]);
 
     const dismiss = async () => {
       if (busy || deleteConfirm) return;
@@ -96,8 +134,9 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
 
     const handleDeleteClick = () => {
       if (busy) return;
-      setDeleteConfirm(true);
+      inputRef.current?.blur();
       setError(null);
+      setDeleteConfirm(true);
     };
 
     const handleDeleteConfirm = async () => {
@@ -144,9 +183,15 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
       deleteConfirm &&
       createPortal(
         <div
-          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40 px-6"
+          className="fixed z-[70] flex items-center justify-center bg-black/40 px-6"
+          style={{
+            top: deleteModalFrame.top,
+            left: deleteModalFrame.left,
+            width: deleteModalFrame.width,
+            height: deleteModalFrame.height,
+          }}
           onClick={() => {
-            if (!busy) setDeleteConfirm(false);
+            if (!busy) closeDeleteConfirm();
           }}
           role="presentation"
         >
@@ -167,7 +212,7 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => setDeleteConfirm(false)}
+                onClick={closeDeleteConfirm}
                 className="flex-1 rounded-xl border border-gcal-border py-3 text-base font-medium text-[#3c4043] hover:bg-[#f1f3f4] disabled:opacity-50"
               >
                 취소
@@ -214,8 +259,7 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
           </div>
           <button
             type="button"
-            disabled={busy}
-            onPointerDown={keepFocus}
+            disabled={busy || deleteConfirm}
             onClick={handleDeleteClick}
             className="shrink-0 text-base text-red-600 hover:text-red-700 disabled:opacity-50"
           >
@@ -238,7 +282,7 @@ export const ReservationEditor = forwardRef<ReservationEditorHandle, Reservation
           onBlur={handleInputBlur}
           onPointerDown={(event) => event.stopPropagation()}
           placeholder="7:00 4명 김다민 VIP1"
-          disabled={busy}
+          disabled={busy || deleteConfirm}
           className="w-full rounded-xl border border-gcal-border px-4 py-4 text-base outline-none focus:border-gcal-blue focus:ring-2 focus:ring-gcal-blue/20"
         />
 
