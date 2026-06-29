@@ -44,7 +44,7 @@ export function MonthCalendar({
   const { gridRef, maxPreviewLines } = useMonthGridPreviewLimit(weekCount, true);
 
   return (
-    <section className="branch-surface flex min-h-0 flex-1 flex-col px-0 pb-2">
+    <section className="flex min-h-0 flex-1 flex-col px-0 pb-2">
       <div
         className="flex min-h-0 flex-1 flex-col touch-pan-y"
         onPointerDown={swipe.onPointerDown}

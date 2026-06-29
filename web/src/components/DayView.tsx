@@ -716,19 +716,19 @@ export function DayView({
         pinchState.current.active = false;
       }}
     >
-      <header className="branch-surface flex shrink-0 items-center gap-2 border-b border-gcal-border px-3 pb-3 pt-screen-header">
+      <header className="flex shrink-0 items-center gap-2 border-b border-gcal-border px-3 pb-3 pt-screen-header">
         <button
           type="button"
           onClick={() => void handleBack()}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-[#3c4043] hover:bg-[#f1f3f4]"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-gcal-text hover:bg-[#f1f3f4]"
           aria-label="달력으로 돌아가기"
         >
           <span className="text-3xl leading-none font-light">‹</span>
         </button>
-        <h1 className="min-w-0 flex-1 truncate text-lg text-[#3c4043]">
+        <h1 className="min-w-0 flex-1 truncate text-lg text-gcal-text">
           {formatSelectedDateTitle(date)}
         </h1>
-        <span className="shrink-0 text-base font-medium text-[#3c4043]">
+        <span className="shrink-0 text-base font-medium text-gcal-text">
           {getStoreBrandLabel()}
         </span>
       </header>
@@ -739,7 +739,7 @@ export function DayView({
 
       <div
         ref={scrollRef}
-        className="branch-surface min-h-0 flex-1 overflow-y-auto"
+        className="min-h-0 flex-1 overflow-y-auto"
         onScroll={(event) => {
           dayScrollByDateKey.set(dateKey, event.currentTarget.scrollTop);
         }}
@@ -783,7 +783,7 @@ export function DayView({
 
           <div
             ref={gridRef}
-            className="branch-surface relative flex-1 touch-pan-y select-none"
+            className="relative flex-1 touch-pan-y select-none"
             style={{ height: gridHeight }}
             onPointerDown={(event) => {
               if (draggingId) return;

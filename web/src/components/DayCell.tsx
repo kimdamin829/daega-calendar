@@ -43,7 +43,7 @@ export function DayCell({
           className={[
             "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-medium",
             isToday ? "bg-gcal-blue text-white" : "",
-            isCurrentMonth ? "text-[#3c4043]" : "text-[#9aa0a6]",
+            isCurrentMonth ? "text-gcal-text" : "text-gcal-muted",
           ]
             .filter(Boolean)
             .join(" ")}

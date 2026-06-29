@@ -14,8 +14,13 @@ export function isBranchStore(): boolean {
   return STORE_ID === BRANCH_STORE_ID;
 }
 
+const STORE_BRAND_LABELS: Record<string, string> = {
+  [DEFAULT_STORE_ID]: "순천점",
+  [BRANCH_STORE_ID]: "광양점",
+};
+
 export function getStoreBrandLabel(): string {
-  return isBranchStore() ? "광양점" : "순천점";
+  return STORE_BRAND_LABELS[STORE_ID] ?? STORE_BRAND_LABELS[DEFAULT_STORE_ID];
 }
 
 /** 2호점 연분홍 테마 — html.store-branch (CSS 변수는 index.css) */

@@ -4,6 +4,8 @@
   --color-gcal-blue: #1a73e8;
   --color-gcal-blue-light: #e8f0fe;
   --color-gcal-gray: #70757a;
+  --color-gcal-text: #3c4043;
+  --color-gcal-muted: #9aa0a6;
   --color-gcal-border: #dadce0;
   --color-gcal-grid: #d8dce0;
 }
@@ -71,13 +73,13 @@ html.route-today #root {
   overflow: visible;
 }
 
-/* 2호점(광양) — 연분홍 배경 (앱·헤더·일별 시간열·위젯과 동일 톤) */
+/* 2호점(광양) — 앱 연분홍 (위젯 #ffebf0 보다 살짝 연함) */
 .branch-surface {
   background-color: #fff;
 }
 
 html.store-branch {
-  --branch-surface: #ffebf0;
+  --branch-surface: #fff0f3;
 }
 
 html.store-branch:not(.route-today) body,

@@ -75,7 +75,7 @@ export function MonthPickerBar({ month, onMonthChange }: MonthPickerBarProps) {
               "shrink-0 rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
               selected
                 ? "border-gcal-blue bg-gcal-blue-light text-gcal-blue"
-                : "branch-surface border-gcal-border text-[#3c4043] hover:bg-[#f1f3f4]",
+                : "border-gcal-border bg-white text-[#3c4043] hover:bg-[#f1f3f4]",
             ].join(" ")}
             aria-pressed={selected}
           >
