@@ -90,6 +90,16 @@ function CalendarApp({ initialSelectedDate, initialView }: {
     syncCalendarUrl(selectedDate, view);
   }, [selectedDate, view]);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    if (view === "day") {
+      root.classList.add("route-day");
+    } else {
+      root.classList.remove("route-day");
+    }
+    return () => root.classList.remove("route-day");
+  }, [view]);
+
   const handleDateSelect = (date: Date) => {
     applyNavigation(date, "day");
   };

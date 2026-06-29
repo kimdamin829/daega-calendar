@@ -73,17 +73,17 @@ html.route-today #root {
   overflow: visible;
 }
 
-/* 2호점(광양) — 앱 연분홍 (위젯 #ffebf0 보다 살짝 연함) */
+/* 2호점(광양) — 월별뷰는 1호와 동일(흰색), 일별뷰만 연분홍 */
 .branch-surface {
   background-color: #fff;
 }
 
 html.store-branch {
-  --branch-surface: #fff0f3;
+  --branch-surface: #fff6f8;
 }
 
-html.store-branch:not(.route-today) body,
-html.store-branch:not(.route-today) #root,
-html.store-branch:not(.route-today) .branch-surface {
+html.store-branch.route-day:not(.route-today) body,
+html.store-branch.route-day:not(.route-today) #root,
+html.store-branch.route-day:not(.route-today) .branch-surface {
   background-color: var(--branch-surface);
 }
