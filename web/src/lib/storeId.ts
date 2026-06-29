@@ -14,6 +14,10 @@ export function isBranchStore(): boolean {
   return STORE_ID === BRANCH_STORE_ID;
 }
 
+export function getStoreBrandLabel(): string {
+  return isBranchStore() ? "광양점" : "순천점";
+}
+
 /** 2호점 연분홍 테마 — html.store-branch (CSS 변수는 index.css) */
 export function installStoreTheme(): void {
   if (isBranchStore()) {

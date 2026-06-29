@@ -14,6 +14,7 @@ import {
 import { useHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
 import { useRafValue } from "@/hooks/useRafValue";
 import { formatSelectedDateTitle, toDateString } from "@/lib/dateUtils";
+import { getStoreBrandLabel } from "@/lib/storeId";
 import {
   clampMinutes,
   DEFAULT_DURATION,
@@ -704,7 +705,7 @@ export function DayView({
 
   return (
     <div
-      className="branch-surface flex h-dvh flex-col bg-white touch-pan-y"
+      className="branch-surface flex h-dvh flex-col touch-pan-y"
       onPointerDown={handleRootPointerDown}
       onPointerUpCapture={handleRootPointerUpCapture}
       onPointerCancel={daySwipe.onPointerCancel}
@@ -715,7 +716,7 @@ export function DayView({
         pinchState.current.active = false;
       }}
     >
-      <header className="flex shrink-0 items-center gap-2 border-b border-gcal-border px-3 pb-3 pt-screen-header">
+      <header className="branch-surface flex shrink-0 items-center gap-2 border-b border-gcal-border px-3 pb-3 pt-screen-header">
         <button
           type="button"
           onClick={() => void handleBack()}
@@ -724,7 +725,12 @@ export function DayView({
         >
           <span className="text-3xl leading-none font-light">‹</span>
         </button>
-        <h1 className="text-lg text-[#3c4043]">{formatSelectedDateTitle(date)}</h1>
+        <h1 className="min-w-0 flex-1 truncate text-lg text-[#3c4043]">
+          {formatSelectedDateTitle(date)}
+        </h1>
+        <span className="shrink-0 text-base font-medium text-[#3c4043]">
+          {getStoreBrandLabel()}
+        </span>
       </header>
 
       {error && (
@@ -733,14 +739,14 @@ export function DayView({
 
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 overflow-y-auto"
+        className="branch-surface min-h-0 flex-1 overflow-y-auto"
         onScroll={(event) => {
           dayScrollByDateKey.set(dateKey, event.currentTarget.scrollTop);
         }}
       >
         <div className="relative flex" style={{ minHeight: gridHeight }}>
           <div
-            className="branch-surface sticky left-0 z-20 w-16 shrink-0 touch-pan-y bg-white"
+            className="branch-surface sticky left-0 z-20 w-16 shrink-0 touch-pan-y"
             onPointerDown={(event) => {
               if (event.button !== 0 || draggingId || !isGridInteractive()) return;
               if (!editingId || liveEditText.trim()) return;
@@ -777,7 +783,7 @@ export function DayView({
 
           <div
             ref={gridRef}
-            className="relative flex-1 touch-pan-y select-none"
+            className="branch-surface relative flex-1 touch-pan-y select-none"
             style={{ height: gridHeight }}
             onPointerDown={(event) => {
               if (draggingId) return;

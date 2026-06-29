@@ -41,7 +41,7 @@ export function MonthViewHeader({ month, todayKey, onMonthChange }: MonthViewHea
 
   return (
     <>
-      <header className="branch-surface bg-white pt-screen-header">
+      <header className="branch-surface pt-screen-header">
         <div className="flex items-center justify-between px-4 pb-1.5 pt-1">
           <h1 className="text-[22px] font-normal text-[#3c4043]">{formatMonthTitle(month)}</h1>
 

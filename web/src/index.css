@@ -72,8 +72,12 @@ html.route-today #root {
 }
 
 /* 2호점(광양) — 연분홍 배경 (앱·헤더·일별 시간열·위젯과 동일 톤) */
+.branch-surface {
+  background-color: #fff;
+}
+
 html.store-branch {
-  --branch-surface: #fffbfc;
+  --branch-surface: #ffebf0;
 }
 
 html.store-branch:not(.route-today) body,
