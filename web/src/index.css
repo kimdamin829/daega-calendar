@@ -70,3 +70,14 @@ html.route-today #root {
   min-height: var(--app-height, 100dvh);
   overflow: visible;
 }
+
+/* 2호점(광양) — 연분홍 배경 (앱·헤더·일별 시간열·위젯과 동일 톤) */
+html.store-branch {
+  --branch-surface: #fffbfc;
+}
+
+html.store-branch:not(.route-today) body,
+html.store-branch:not(.route-today) #root,
+html.store-branch:not(.route-today) .branch-surface {
+  background-color: var(--branch-surface);
+}

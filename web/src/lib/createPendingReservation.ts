@@ -3,6 +3,7 @@ import { clampMinutes, DEFAULT_DURATION } from "@/lib/dayGrid";
 import { newId } from "@/lib/newId";
 import { PLACEHOLDER_TIME } from "@/lib/reservationConstants";
 import { DEFAULT_PARTY_COUNTS } from "@/lib/partyCounts";
+import { getStoreId } from "@/lib/storeId";
 
 export function createPendingReservation(
   date: string,
@@ -14,6 +15,7 @@ export function createPendingReservation(
 
   return {
     id: newId(),
+    store_id: getStoreId(),
     date,
     time: PLACEHOLDER_TIME,
     ...DEFAULT_PARTY_COUNTS,

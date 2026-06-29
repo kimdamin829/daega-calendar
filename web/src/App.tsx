@@ -122,7 +122,7 @@ function CalendarApp({ initialSelectedDate, initialView }: {
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden bg-white">
+    <div className="branch-surface flex h-full min-h-0 flex-col overflow-hidden bg-white">
       <MonthViewHeader month={month} todayKey={koreaTodayKey} onMonthChange={setMonth} />
       <MonthPickerBar month={month} onMonthChange={setMonth} />
 

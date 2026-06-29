@@ -3,6 +3,7 @@ import type { PartyCounts, PartySeparator } from "@/lib/partyCounts";
 
 export interface Reservation extends PartyCounts {
   id: string;
+  store_id: string;
   date: string;
   time: string;
   guest_name: string;
@@ -51,5 +52,5 @@ export type ReservationDisplaySource = Pick<
 
 export type ReservationContentPayload = Omit<
   Reservation,
-  "id" | "date" | "created_at" | "updated_at"
+  "id" | "date" | "store_id" | "created_at" | "updated_at"
 >;

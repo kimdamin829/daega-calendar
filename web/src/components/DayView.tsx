@@ -704,7 +704,7 @@ export function DayView({
 
   return (
     <div
-      className="flex h-dvh flex-col bg-white touch-pan-y"
+      className="branch-surface flex h-dvh flex-col bg-white touch-pan-y"
       onPointerDown={handleRootPointerDown}
       onPointerUpCapture={handleRootPointerUpCapture}
       onPointerCancel={daySwipe.onPointerCancel}
@@ -740,7 +740,7 @@ export function DayView({
       >
         <div className="relative flex" style={{ minHeight: gridHeight }}>
           <div
-            className="sticky left-0 z-20 w-16 shrink-0 touch-pan-y bg-white"
+            className="branch-surface sticky left-0 z-20 w-16 shrink-0 touch-pan-y bg-white"
             onPointerDown={(event) => {
               if (event.button !== 0 || draggingId || !isGridInteractive()) return;
               if (!editingId || liveEditText.trim()) return;

@@ -5,6 +5,7 @@ import type {
   ReservationPositionUpdate,
 } from "@/types/reservation";
 import { DEFAULT_PARTY_COUNTS } from "@/lib/partyCounts";
+import { getStoreId } from "@/lib/storeId";
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -20,6 +21,7 @@ function normalizeReservationRow(row: Reservation): Reservation {
 
   return {
     ...row,
+    store_id: row.store_id ?? getStoreId(),
     adult_count: row.adult_count ?? DEFAULT_PARTY_COUNTS.adult_count,
     child_count: row.child_count ?? DEFAULT_PARTY_COUNTS.child_count,
     infant_count: row.infant_count ?? DEFAULT_PARTY_COUNTS.infant_count,
@@ -39,6 +41,7 @@ export async function fetchReservationsInRange(
   const { data, error } = await supabase
     .from("reservations")
     .select("*")
+    .eq("store_id", getStoreId())
     .gte("date", start)
     .lte("date", end)
     .order("date")
@@ -54,7 +57,7 @@ export async function createReservation(input: ReservationInput): Promise<Reserv
 
   const { data, error } = await supabase
     .from("reservations")
-    .insert(input)
+    .insert({ ...input, store_id: getStoreId() })
     .select()
     .single();
 
@@ -72,6 +75,7 @@ export async function updateReservation(
     .from("reservations")
     .update(updates)
     .eq("id", id)
+    .eq("store_id", getStoreId())
     .select()
     .single();
 
@@ -82,7 +86,10 @@ export async function updateReservation(
 export async function deleteReservation(id: string): Promise<void> {
   if (!supabase) throw new Error("Supabase가 설정되지 않았습니다.");
 
-  const { error } = await supabase.from("reservations").delete().eq("id", id);
+  const { error } = await supabase
+    .from("reservations")
+    .delete()
+    .eq("id", id)
+    .eq("store_id", getStoreId());
   if (error) throw error;
 }
-
