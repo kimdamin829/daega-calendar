@@ -41,7 +41,7 @@ export const BRANCH_BOARD_TYPOGRAPHY: BoardTableTypography = {
   cellText: `text-[44px] ${BOARD_FONT}`,
   suffixText: `text-[36px] ${BOARD_FONT}`,
   partyText: {
-    1: "text-[46px]",
+    1: "text-[50px]",
     2: "text-[46px]",
     3: "text-[43px]",
   },
