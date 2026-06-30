@@ -1,6 +1,13 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
-import type { PartyTier } from "@/lib/partyCounts";
+import { useRef } from "react";
+import { BoardGuestNameCell, BoardPartyLabel, BoardTableError } from "@/components/board/BoardTableCells";
 import { StatusTitleDivider } from "@/components/StatusTitleDivider";
+import { useBoardScale } from "@/hooks/useBoardScale";
+import {
+  BOARD_FONT,
+  BOARD_HEADER_LABELS,
+  getSeatTextClass,
+  MAIN_BOARD_TYPOGRAPHY,
+} from "@/lib/boardTableTheme";
 import { BOARD_COLUMN_SIZE, formatBoardTitle, type BoardEntry } from "@/lib/statusBoard";
 import {
   STATUS_BROWN,
@@ -12,26 +19,12 @@ import {
 const DESIGN_WIDTH = 1920;
 const DESIGN_HEIGHT = 1080;
 const BG_OPACITY = 0.24;
+const TYPO = MAIN_BOARD_TYPOGRAPHY;
 
-const GRID_COLS =
-  "grid-cols-[minmax(0,0.78fr)_minmax(0,1.85fr)_minmax(0,1.15fr)_minmax(0,1.1fr)]";
-const BOARD_FONT = "font-bold";
-const HEADER_TEXT = `text-[38px] ${BOARD_FONT}`;
-const CELL_TEXT = `text-[48px] ${BOARD_FONT}`;
-const TITLE_TEXT = `text-[62px] ${BOARD_FONT}`;
-const NAME_SPACED_CHARS = "inline-flex items-baseline justify-center gap-x-[0.14em]";
-const ROW_CLASS = `grid ${GRID_COLS} min-h-[78px] items-center px-10 text-center`;
+const ROW_CLASS = `grid ${TYPO.gridCols} min-h-[78px] items-center px-10 text-center`;
 const COLUMN_CLASS = "min-w-0 flex-1";
-const SUFFIX_TEXT = HEADER_TEXT;
+const TITLE_TEXT = `text-[62px] ${BOARD_FONT}`;
 const TABLE_BODY_CLASS = "divide-y divide-[#f0ebe3]";
-
-const PARTY_TEXT: Record<PartyTier, string> = {
-  1: "text-[50px]",
-  2: "text-[47px]",
-  3: "text-[44px]",
-};
-
-const HEADER_LABELS = ["시간", "고객명", "인원", "좌석"] as const;
 
 const ROW_INDICES = Array.from({ length: BOARD_COLUMN_SIZE }, (_, index) => index);
 
@@ -60,10 +53,10 @@ function BoardTableBackground({ centered }: { centered: boolean }) {
 function BoardTableHeader({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`grid ${GRID_COLS} px-10 py-4 text-center ${HEADER_TEXT} tracking-wide ${className}`}
+      className={`grid ${TYPO.gridCols} px-10 py-4 text-center ${TYPO.headerText} tracking-wide ${className}`}
       style={{ backgroundColor: STATUS_HEADER_BG, color: STATUS_BROWN }}
     >
-      {HEADER_LABELS.map((label) => (
+      {BOARD_HEADER_LABELS.map((label) => (
         <span key={label}>{label}</span>
       ))}
     </div>
@@ -80,22 +73,6 @@ function BoardSplitDivider() {
   );
 }
 
-function BoardPartyLabel({ partyParts }: { partyParts: string[] }) {
-  const partyTier = partyParts.length as PartyTier;
-
-  return (
-    <span className={BOARD_FONT}>
-      {partyParts.map((part, index) => (
-        <span key={index}>
-          {index > 0 && <span className={SUFFIX_TEXT}>&</span>}
-          <span className={PARTY_TEXT[partyTier]}>{part}</span>
-        </span>
-      ))}
-      <span className={SUFFIX_TEXT}>명</span>
-    </span>
-  );
-}
-
 function BoardTableRow({
   entry,
   className = "",
@@ -107,22 +84,14 @@ function BoardTableRow({
     return <div className={`${ROW_CLASS} ${className}`} />;
   }
 
-  const seatLabel = entry.seat?.trim() || "-";
-  const seatSize = seatLabel.length > 6 ? "text-[42px]" : "text-[48px]";
+  const seatClass = getSeatTextClass(entry.seat, TYPO);
 
   return (
     <div className={`${ROW_CLASS} ${className}`} style={{ color: STATUS_BROWN }}>
-      <span className={`${CELL_TEXT} tabular-nums`}>{entry.time}</span>
-      <span className={`${CELL_TEXT} inline-flex items-baseline justify-center`}>
-        <span className={NAME_SPACED_CHARS}>
-          {entry.guestNameChars.map((char, index) => (
-            <span key={`${char}-${index}`}>{char}</span>
-          ))}
-        </span>
-        <span className={SUFFIX_TEXT}>님</span>
-      </span>
-      <BoardPartyLabel partyParts={entry.partyParts} />
-      <span className={`${seatSize} ${BOARD_FONT} break-all`}>{seatLabel}</span>
+      <span className={`${TYPO.cellText} tabular-nums`}>{entry.time}</span>
+      <BoardGuestNameCell guestNameChars={entry.guestNameChars} typography={TYPO} />
+      <BoardPartyLabel partyParts={entry.partyParts} typography={TYPO} />
+      <span className={`${seatClass} ${BOARD_FONT} break-all`}>{entry.seat?.trim() || "-"}</span>
     </div>
   );
 }
@@ -152,13 +121,7 @@ function BoardTableBody({
   );
 }
 
-function BoardTable({
-  left,
-  right,
-}: {
-  left: BoardEntry[];
-  right: BoardEntry[];
-}) {
+function BoardTable({ left, right }: { left: BoardEntry[]; right: BoardEntry[] }) {
   const isSplit = right.length > 0;
 
   return (
@@ -187,32 +150,9 @@ function BoardTable({
   );
 }
 
-function useBoardScale(containerRef: RefObject<HTMLDivElement | null>) {
-  const [scale, setScale] = useState(1);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const updateScale = () => {
-      setScale(
-        Math.min(container.clientWidth / DESIGN_WIDTH, container.clientHeight / DESIGN_HEIGHT),
-      );
-    };
-
-    updateScale();
-
-    const observer = new ResizeObserver(updateScale);
-    observer.observe(container);
-    return () => observer.disconnect();
-  }, [containerRef]);
-
-  return scale;
-}
-
 export function BoardView({ date, left, right, error }: BoardViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const scale = useBoardScale(containerRef);
+  const scale = useBoardScale(containerRef, DESIGN_WIDTH, DESIGN_HEIGHT);
 
   return (
     <div
@@ -237,9 +177,7 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
         />
 
         <header className="relative z-10 flex shrink-0 flex-col items-center pt-14">
-          <h1 className={`${TITLE_TEXT} tracking-tight`}>
-            {formatBoardTitle(date)}
-          </h1>
+          <h1 className={`${TITLE_TEXT} tracking-tight`}>{formatBoardTitle(date)}</h1>
         </header>
 
         <StatusTitleDivider />
@@ -250,11 +188,7 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
           </div>
         </main>
 
-        {error && (
-          <p className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 text-center text-[22px] text-red-600">
-            {error}
-          </p>
-        )}
+        <BoardTableError error={error} />
       </div>
     </div>
   );

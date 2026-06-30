@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { addDays, startOfMonth } from "date-fns";
-import { BoardView } from "@/components/BoardView";
+import { BoardApp } from "@/components/BoardApp";
 import { DayView } from "@/components/DayView";
 import { MonthCalendar } from "@/components/MonthCalendar";
 import { MonthPickerBar } from "@/components/MonthPickerBar";
@@ -12,11 +12,10 @@ import { useReservations } from "@/hooks/useReservations";
 import { useKoreaToday } from "@/hooks/useTodayDate";
 import { parseDateParam, syncMonthToDate } from "@/lib/dateUtils";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { buildStatusBoard } from "@/lib/statusBoard";
+import { isBranchStore } from "@/lib/storeId";
 import { buildTodaySummary } from "@/lib/todaySummary";
 import {
   readUrlState,
-  syncBoardUrl,
   syncCalendarUrl,
   syncTodayUrl,
   type ViewMode,
@@ -33,17 +32,6 @@ function TodayApp() {
   }, []);
 
   return <TodayView date={date} summary={summary} error={error} />;
-}
-
-function BoardApp() {
-  const { date, dateKey } = useKoreaToday();
-  const { data: board, error } = useStatusDisplayReservations(dateKey, buildStatusBoard);
-
-  useEffect(() => {
-    syncBoardUrl();
-  }, []);
-
-  return <BoardView date={date} left={board.left} right={board.right} error={error} />;
 }
 
 function CalendarApp({ initialSelectedDate, initialView }: {
@@ -162,7 +150,7 @@ export default function App() {
     return <TodayApp />;
   }
   if (view === "board") {
-    return <BoardApp />;
+    return <BoardApp branch={isBranchStore()} />;
   }
 
   return <CalendarApp initialSelectedDate={selectedDate} initialView={view} />;
