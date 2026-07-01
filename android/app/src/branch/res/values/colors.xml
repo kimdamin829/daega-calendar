@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 2호점 — 위젯 #FFEBF0 / 앱(WebView) 월별뷰는 1호와 동일 흰색 -->
+    <color name="widget_background">#FFEBF0</color>
+    <color name="app_background">#FFFFFF</color>
+</resources>

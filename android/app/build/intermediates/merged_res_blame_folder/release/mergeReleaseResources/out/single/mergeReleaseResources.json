@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.daega.calendar.app-release-64:/drawable_ic_launcher.xml.flat",
+        "source": "com.daega.calendar.app-main-65:/drawable/ic_launcher.xml"
+    },
+    {
+        "merged": "com.daega.calendar.app-release-64:/drawable_widget_grid_cell.xml.flat",
+        "source": "com.daega.calendar.app-main-65:/drawable/widget_grid_cell.xml"
+    },
+    {
+        "merged": "com.daega.calendar.app-release-64:/layout_widget_loading.xml.flat",
+        "source": "com.daega.calendar.app-main-65:/layout/widget_loading.xml"
+    },
+    {
+        "merged": "com.daega.calendar.app-release-64:/xml_calendar_widget_info.xml.flat",
+        "source": "com.daega.calendar.app-main-65:/xml/calendar_widget_info.xml"
+    }
+]

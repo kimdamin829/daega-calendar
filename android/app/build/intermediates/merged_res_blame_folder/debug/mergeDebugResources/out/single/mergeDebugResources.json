@@ -1,0 +1,22 @@
+[
+    {
+        "merged": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-debug-64:/layout_widget_loading.xml.flat",
+        "source": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-main-66:/layout/widget_loading.xml"
+    },
+    {
+        "merged": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-debug-64:/drawable_widget_grid_cell.xml.flat",
+        "source": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-main-66:/drawable/widget_grid_cell.xml"
+    },
+    {
+        "merged": "com.daega.calendar.app-debug-64:/xml_calendar_widget_info.xml.flat",
+        "source": "com.daega.calendar.app-main-66:/xml/calendar_widget_info.xml"
+    },
+    {
+        "merged": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-debug-64:/drawable_ic_launcher.xml.flat",
+        "source": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-main-66:/drawable/ic_launcher.xml"
+    },
+    {
+        "merged": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-debug-64:/xml_calendar_widget_info.xml.flat",
+        "source": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-main-66:/xml/calendar_widget_info.xml"
+    }
+]

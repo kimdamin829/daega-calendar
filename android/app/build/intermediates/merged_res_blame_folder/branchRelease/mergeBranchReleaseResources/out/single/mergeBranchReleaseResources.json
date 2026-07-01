@@ -1,0 +1,54 @@
+[
+    {
+        "merged": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-branchRelease-64:/layout_widget_loading.xml.flat",
+        "source": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-main-67:/layout/widget_loading.xml"
+    },
+    {
+        "merged": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-branchRelease-64:/drawable_ic_launcher.xml.flat",
+        "source": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-branch-65:/drawable/ic_launcher.xml"
+    },
+    {
+        "merged": "com.daega.calendar.app-branchRelease-64:/drawable_chip_bg_gray.xml.flat",
+        "source": "com.daega.calendar.app-main-67:/drawable/chip_bg_gray.xml"
+    },
+    {
+        "merged": "com.daega.calendar.app-branchRelease-64:/drawable_chip_bg_yellow.xml.flat",
+        "source": "com.daega.calendar.app-main-67:/drawable/chip_bg_yellow.xml"
+    },
+    {
+        "merged": "com.daega.calendar.app-branchRelease-64:/drawable_chip_bg_pink.xml.flat",
+        "source": "com.daega.calendar.app-main-67:/drawable/chip_bg_pink.xml"
+    },
+    {
+        "merged": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-branchRelease-64:/xml_calendar_widget_info.xml.flat",
+        "source": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-main-67:/xml/calendar_widget_info.xml"
+    },
+    {
+        "merged": "com.daega.calendar.app-branchRelease-64:/drawable_chip_bg_muted.xml.flat",
+        "source": "com.daega.calendar.app-main-67:/drawable/chip_bg_muted.xml"
+    },
+    {
+        "merged": "com.daega.calendar.app-branchRelease-64:/drawable_chip_bg_green.xml.flat",
+        "source": "com.daega.calendar.app-main-67:/drawable/chip_bg_green.xml"
+    },
+    {
+        "merged": "com.daega.calendar.app-branchRelease-64:/drawable_chip_bg_blue.xml.flat",
+        "source": "com.daega.calendar.app-main-67:/drawable/chip_bg_blue.xml"
+    },
+    {
+        "merged": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-branchRelease-64:/drawable_widget_surface.xml.flat",
+        "source": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-main-67:/drawable/widget_surface.xml"
+    },
+    {
+        "merged": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-branchRelease-64:/drawable_widget_grid_cell.xml.flat",
+        "source": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-main-67:/drawable/widget_grid_cell.xml"
+    },
+    {
+        "merged": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-branchRelease-64:/drawable_widget_today_circle.xml.flat",
+        "source": "/Users/kimdamin/.gradle/daemon/8.9/com.daega.calendar.app-main-67:/drawable/widget_today_circle.xml"
+    },
+    {
+        "merged": "com.daega.calendar.app-branchRelease-64:/drawable_chip_bg_purple.xml.flat",
+        "source": "com.daega.calendar.app-main-67:/drawable/chip_bg_purple.xml"
+    }
+]

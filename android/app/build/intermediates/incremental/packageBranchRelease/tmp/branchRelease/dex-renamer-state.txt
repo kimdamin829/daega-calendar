@@ -1,0 +1,10 @@
+#Tue Jun 30 18:02:53 KST 2026
+base.0=/Users/kimdamin/Projects/daega-calendar/android/app/build/intermediates/dex/branchRelease/mergeDexBranchRelease/classes.dex
+base.1=/Users/kimdamin/Projects/daega-calendar/android/app/build/intermediates/dex/branchRelease/mergeDexBranchRelease/classes2.dex
+base.2=/Users/kimdamin/Projects/daega-calendar/android/app/build/intermediates/dex/branchRelease/mergeDexBranchRelease/classes3.dex
+path.0=classes.dex
+path.1=classes2.dex
+path.2=classes3.dex
+renamed.0=classes.dex
+renamed.1=classes2.dex
+renamed.2=classes3.dex

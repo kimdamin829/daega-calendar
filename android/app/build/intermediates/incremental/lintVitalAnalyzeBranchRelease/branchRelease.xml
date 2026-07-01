@@ -1,0 +1,31 @@
+<variant
+    name="branchRelease"
+    package="com.daega.calendar"
+    minSdkVersion="26"
+    targetSdkVersion="35"
+    mergedManifest="build/intermediates/merged_manifest/branchRelease/processBranchReleaseMainManifest/AndroidManifest.xml"
+    proguardFiles="build/intermediates/default_proguard_files/global/proguard-android-optimize.txt-8.7.3:proguard-rules.pro"
+    partialResultsDir="build/intermediates/lint_vital_partial_results/branchRelease/lintVitalAnalyzeBranchRelease/out"
+    desugaredMethodsFiles="/Users/kimdamin/.gradle/caches/8.9/transforms/5869244a68343184ef9602553f00df0c/transformed/D8BackportedDesugaredMethods.txt">
+  <buildFeatures
+      namespacing="REQUIRED"/>
+  <sourceProviders>
+    <sourceProvider
+        manifests="src/main/AndroidManifest.xml"
+        javaDirectories="src/main/java:src/branch/java:src/release/java:src/branchRelease/java:src/main/kotlin:src/branch/kotlin:src/release/kotlin:src/branchRelease/kotlin"
+        resDirectories="src/main/res:src/branch/res:src/release/res:src/branchRelease/res"
+        assetsDirectories="src/main/assets:src/branch/assets:src/release/assets:src/branchRelease/assets"/>
+  </sourceProviders>
+  <testSourceProviders>
+  </testSourceProviders>
+  <testFixturesSourceProviders>
+  </testFixturesSourceProviders>
+  <artifact
+      classOutputs="build/intermediates/javac/branchRelease/compileBranchReleaseJavaWithJavac/classes:build/tmp/kotlin-classes/branchRelease:build/kotlinToolingMetadata:build/intermediates/compile_and_runtime_not_namespaced_r_class_jar/branchRelease/processBranchReleaseResources/R.jar"
+      type="MAIN"
+      applicationId="com.daega.calendar.branch"
+      generatedSourceFolders="build/generated/ap_generated_sources/branchRelease/out:build/generated/source/buildConfig/branch/release"
+      generatedResourceFolders="build/generated/res/resValues/branch/release"
+      desugaredMethodsFiles="/Users/kimdamin/.gradle/caches/8.9/transforms/5869244a68343184ef9602553f00df0c/transformed/D8BackportedDesugaredMethods.txt">
+  </artifact>
+</variant>

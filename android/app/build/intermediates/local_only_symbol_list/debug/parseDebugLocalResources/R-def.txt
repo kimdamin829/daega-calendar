@@ -1,0 +1,19 @@
+R_DEF: Internal format may change without notice
+local
+color gcal_blue
+color gcal_blue_light
+color gcal_gray
+color gcal_text
+color widget_background
+drawable ic_launcher
+drawable widget_grid_cell
+layout widget_loading
+string app_name
+string widget_brand_name
+string widget_name
+string widget_next_month
+string widget_prev_month
+string widget_setup_required
+string widget_today
+style Theme.DaegaCalendar
+xml calendar_widget_info
