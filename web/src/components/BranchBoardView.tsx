@@ -4,11 +4,13 @@ import {
   BoardPartyLabel,
   BoardTableError,
 } from "@/components/board/BoardTableCells";
+import { StatusTitleDivider } from "@/components/StatusTitleDivider";
 import { useBoardScale } from "@/hooks/useBoardScale";
 import {
   BOARD_FONT,
   BOARD_HEADER_LABELS,
   BRANCH_BOARD_TYPOGRAPHY,
+  formatBoardSeatLabel,
   getSeatTextClass,
 } from "@/lib/boardTableTheme";
 import { BRANCH_BOARD_COLUMN_SIZE, formatBoardTitle, type BoardEntry } from "@/lib/statusBoard";
@@ -26,7 +28,8 @@ const DESIGN_HEIGHT = 1920;
 const BRANCH_TABLE_WIDTH = 920;
 const TYPO = BRANCH_BOARD_TYPOGRAPHY;
 const TITLE_TEXT = `text-[58px] ${BOARD_FONT} tracking-tight`;
-const TABLE_BODY_CLASS = "flex flex-1 flex-col bg-white";
+const BRANCH_TABLE_BG = "/branch-board-table-bg.png";
+const TABLE_BG_OPACITY = 0.24;
 
 const ROW_INDICES = Array.from({ length: BRANCH_BOARD_COLUMN_SIZE }, (_, index) => index);
 
@@ -68,11 +71,16 @@ function BranchBoardFrame() {
 function BoardTableHeader() {
   return (
     <div
-      className={`grid shrink-0 ${TYPO.gridCols} px-10 py-3 text-center ${TYPO.headerText} tracking-wide`}
+      className={`grid shrink-0 ${TYPO.gridCols} px-10 py-3 ${TYPO.headerText}`}
       style={{ backgroundColor: BRANCH_HEADER_BG, color: BRANCH_HEADER_TEXT }}
     >
       {BOARD_HEADER_LABELS.map((label) => (
-        <span key={label}>{label}</span>
+        <span
+          key={label}
+          className={`flex w-full justify-center ${label === "시간" ? "" : "tracking-wide"}`}
+        >
+          {label}
+        </span>
       ))}
     </div>
   );
@@ -92,15 +100,31 @@ function BoardTableRow({
     return <div className={rowClass} style={dividerStyle} />;
   }
 
-  const seatClass = getSeatTextClass(entry.seat, TYPO);
+  const seatLabel = formatBoardSeatLabel(entry.seat);
+  const seatClass = getSeatTextClass(seatLabel, TYPO);
 
   return (
     <div className={rowClass} style={{ color: STATUS_BROWN, ...dividerStyle }}>
-      <span className={`${TYPO.cellText} tabular-nums`}>{entry.time}</span>
+      <span className={`${TYPO.cellText} flex w-full justify-center tabular-nums`}>{entry.time}</span>
       <BoardGuestNameCell guestNameChars={entry.guestNameChars} typography={TYPO} />
       <BoardPartyLabel partyParts={entry.partyParts} typography={TYPO} />
-      <span className={`${seatClass} ${BOARD_FONT} break-all`}>{entry.seat?.trim() || "-"}</span>
+      <span className={`${seatClass} ${BOARD_FONT} break-all`}>{seatLabel}</span>
     </div>
+  );
+}
+
+function BranchTableBackground() {
+  return (
+    <>
+      <div aria-hidden className="pointer-events-none absolute inset-0 bg-white" />
+      <img
+        src={BRANCH_TABLE_BG}
+        alt=""
+        aria-hidden
+        className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center"
+        style={{ opacity: TABLE_BG_OPACITY }}
+      />
+    </>
   );
 }
 
@@ -111,14 +135,17 @@ function BoardTable({ entries }: { entries: BoardEntry[] }) {
       style={{ width: BRANCH_TABLE_WIDTH }}
     >
       <BoardTableHeader />
-      <div className={TABLE_BODY_CLASS}>
-        {ROW_INDICES.map((index) => (
-          <BoardTableRow
-            key={index}
-            entry={entries[index] ?? null}
-            showDivider={index < BRANCH_BOARD_COLUMN_SIZE - 1}
-          />
-        ))}
+      <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+        <BranchTableBackground />
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col">
+          {ROW_INDICES.map((index) => (
+            <BoardTableRow
+              key={index}
+              entry={entries[index] ?? null}
+              showDivider={index < BRANCH_BOARD_COLUMN_SIZE - 1}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -146,20 +173,22 @@ export function BranchBoardView({ date, entries, error }: BranchBoardViewProps) 
       >
         <BranchBoardFrame />
 
-        <header className="relative z-10 flex shrink-0 flex-col items-center px-16 pt-20 pb-6">
+        <header className="relative z-10 flex shrink-0 flex-col items-center px-16 pt-20">
           <h1 className={`${TITLE_TEXT} text-center`}>{formatBoardTitle(date)}</h1>
         </header>
 
+        <StatusTitleDivider />
+
         <main
-          className="relative z-10 mx-auto mt-3 flex min-h-0 flex-1 flex-col items-center pb-6"
+          className="relative z-10 mx-auto mt-0 flex min-h-0 flex-1 flex-col items-center pb-6"
           style={{ width: BRANCH_TABLE_WIDTH, maxWidth: "100%" }}
         >
           <BoardTable entries={entries} />
         </main>
 
         <footer className="relative z-10 flex shrink-0 flex-col items-center px-16 pt-4 pb-14 text-center">
-          <p className="text-[35px] leading-snug font-medium">
-            오늘도 소중한 시간을 함께해 주셔서 감사합니다.
+          <p className="text-[42px] leading-snug font-bold">
+            고객님의 방문에 진심으로 감사드립니다.
           </p>
         </footer>
 

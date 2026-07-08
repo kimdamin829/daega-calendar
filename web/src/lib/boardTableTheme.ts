@@ -6,7 +6,15 @@ export const BOARD_GRID_COLS_MAIN =
   "grid-cols-[minmax(0,0.78fr)_minmax(0,1.85fr)_minmax(0,1.15fr)_minmax(0,1.1fr)]";
 
 export const BOARD_GRID_COLS_BRANCH =
-  "grid-cols-[minmax(0,0.72fr)_minmax(0,1.85fr)_minmax(0,1.21fr)_minmax(0,1.1fr)]";
+  "grid-cols-[minmax(0,0.6fr)_minmax(0,1.4fr)_minmax(0,1.1fr)_minmax(0,1.1fr)]";
+
+export interface SeatTextTiers {
+  max3: string;
+  max6: string;
+  max8: string;
+}
+
+export const BRANCH_BOARD_SEAT_MAX = 8;
 
 export interface BoardTableTypography {
   gridCols: string;
@@ -16,6 +24,7 @@ export interface BoardTableTypography {
   partyText: Record<PartyTier, string>;
   seatShort: string;
   seatLong: string;
+  seatTextTiers?: SeatTextTiers;
 }
 
 const BOARD_FONT = "font-bold";
@@ -38,7 +47,7 @@ export const MAIN_BOARD_TYPOGRAPHY: BoardTableTypography = {
 export const BRANCH_BOARD_TYPOGRAPHY: BoardTableTypography = {
   gridCols: BOARD_GRID_COLS_BRANCH,
   headerText: `text-[42px] ${BOARD_FONT}`,
-  cellText: `text-[44px] ${BOARD_FONT}`,
+  cellText: `text-[46px] ${BOARD_FONT}`,
   suffixText: `text-[36px] ${BOARD_FONT}`,
   partyText: {
     1: "text-[50px]",
@@ -47,11 +56,33 @@ export const BRANCH_BOARD_TYPOGRAPHY: BoardTableTypography = {
   },
   seatShort: "text-[46px]",
   seatLong: "text-[42px]",
+  seatTextTiers: {
+    max3: "text-[46px]",
+    max6: "text-[43px]",
+    max8: "text-[40px]",
+  },
 };
+
+export function formatBoardSeatLabel(
+  seat: string | null,
+  maxLength = BRANCH_BOARD_SEAT_MAX,
+): string {
+  const label = seat?.trim() || "-";
+  return [...label].slice(0, maxLength).join("");
+}
 
 export function getSeatTextClass(seat: string | null, typography: BoardTableTypography): string {
   const label = seat?.trim() || "-";
-  return label.length > 6 ? typography.seatLong : typography.seatShort;
+  const len = label.length;
+  const tiers = typography.seatTextTiers;
+
+  if (tiers) {
+    if (len <= 3) return tiers.max3;
+    if (len <= 6) return tiers.max6;
+    return tiers.max8;
+  }
+
+  return len > 6 ? typography.seatLong : typography.seatShort;
 }
 
 export { BOARD_FONT, NAME_SPACED_CHARS };
