@@ -105,7 +105,9 @@ function BoardTableRow({
 
   return (
     <div className={rowClass} style={{ color: STATUS_BROWN, ...dividerStyle }}>
-      <span className={`${TYPO.cellText} flex w-full justify-center tabular-nums`}>{entry.time}</span>
+      <span className={`${TYPO.timeText ?? TYPO.cellText} flex w-full justify-center tabular-nums`}>
+        {entry.time}
+      </span>
       <BoardGuestNameCell guestNameChars={entry.guestNameChars} typography={TYPO} />
       <BoardPartyLabel partyParts={entry.partyParts} typography={TYPO} />
       <span className={`${seatClass} ${BOARD_FONT} break-all`}>{seatLabel}</span>

@@ -6,7 +6,7 @@ export const BOARD_GRID_COLS_MAIN =
   "grid-cols-[minmax(0,0.78fr)_minmax(0,1.85fr)_minmax(0,1.15fr)_minmax(0,1.1fr)]";
 
 export const BOARD_GRID_COLS_BRANCH =
-  "grid-cols-[minmax(0,0.6fr)_minmax(0,1.4fr)_minmax(0,1.1fr)_minmax(0,1.1fr)]";
+  "grid-cols-[minmax(0,0.6fr)_minmax(0,1.6fr)_minmax(0,1.1fr)_minmax(0,1.1fr)]";
 
 export interface SeatTextTiers {
   max3: string;
@@ -20,6 +20,7 @@ export interface BoardTableTypography {
   gridCols: string;
   headerText: string;
   cellText: string;
+  timeText?: string;
   suffixText: string;
   partyText: Record<PartyTier, string>;
   seatShort: string;
@@ -48,6 +49,7 @@ export const BRANCH_BOARD_TYPOGRAPHY: BoardTableTypography = {
   gridCols: BOARD_GRID_COLS_BRANCH,
   headerText: `text-[42px] ${BOARD_FONT}`,
   cellText: `text-[46px] ${BOARD_FONT}`,
+  timeText: `text-[50px] ${BOARD_FONT}`,
   suffixText: `text-[36px] ${BOARD_FONT}`,
   partyText: {
     1: "text-[50px]",
