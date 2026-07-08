@@ -9,4 +9,4 @@ export const TODAY_SLOT_GRID = "grid-cols-[1.1fr_0.9fr_0.9fr]";
 /** 2호점 현황판 테이블 헤더·행 구분선 */
 export const BRANCH_HEADER_BG = "#3d2e24";
 export const BRANCH_HEADER_TEXT = "#ffffff";
-export const BRANCH_ROW_DIVIDER = "#ebe3d6";
+export const BRANCH_ROW_DIVIDER = "#faf8f5";
