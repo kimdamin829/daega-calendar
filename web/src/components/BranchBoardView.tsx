@@ -15,19 +15,18 @@ import {
 } from "@/lib/boardTableTheme";
 import { BRANCH_BOARD_COLUMN_SIZE, formatBoardTitle, type BoardEntry } from "@/lib/statusBoard";
 import {
-  BRANCH_HEADER_BG,
-  BRANCH_HEADER_TEXT,
   BRANCH_ROW_DIVIDER,
   STATUS_BROWN,
   STATUS_CREAM,
   STATUS_FRAME_BORDER,
+  STATUS_HEADER_BG,
 } from "@/lib/statusDisplayTheme";
 
 const DESIGN_WIDTH = 1080;
 const DESIGN_HEIGHT = 1920;
 const BRANCH_TABLE_WIDTH = 920;
 const TYPO = BRANCH_BOARD_TYPOGRAPHY;
-const TITLE_TEXT = `text-[58px] ${BOARD_FONT} tracking-tight`;
+const TITLE_TEXT = `text-[62px] ${BOARD_FONT} tracking-tight`;
 const BRANCH_TABLE_BG = "/branch-board-table-bg.png";
 const TABLE_BG_OPACITY = 0.24;
 
@@ -72,7 +71,7 @@ function BoardTableHeader() {
   return (
     <div
       className={`grid shrink-0 ${TYPO.gridCols} px-10 py-3 ${TYPO.headerText}`}
-      style={{ backgroundColor: BRANCH_HEADER_BG, color: BRANCH_HEADER_TEXT }}
+      style={{ backgroundColor: STATUS_HEADER_BG, color: STATUS_BROWN }}
     >
       {BOARD_HEADER_LABELS.map((label) => (
         <span
@@ -182,7 +181,7 @@ export function BranchBoardView({ date, entries, error }: BranchBoardViewProps) 
         <StatusTitleDivider />
 
         <main
-          className="relative z-10 mx-auto mt-0 flex min-h-0 flex-1 flex-col items-center pb-6"
+          className="relative z-10 mx-auto mt-2 flex min-h-0 flex-1 flex-col items-center pb-6"
           style={{ width: BRANCH_TABLE_WIDTH, maxWidth: "100%" }}
         >
           <BoardTable entries={entries} />

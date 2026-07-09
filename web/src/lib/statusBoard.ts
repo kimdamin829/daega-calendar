@@ -21,8 +21,8 @@ interface StatusBoardColumns {
 const BOARD_TEAM_LIMIT = 20;
 export const BOARD_COLUMN_SIZE = 10;
 
-/** 2호점 세로형 현황판 — 단일 컬럼 최대 18팀 */
-export const BRANCH_BOARD_COLUMN_SIZE = 18;
+/** 2호점 세로형 현황판 — 단일 컬럼 최대 16팀 */
+export const BRANCH_BOARD_COLUMN_SIZE = 16;
 
 function formatStatusDateTitle(date: Date, suffix: string): string {
   const dateLabel = format(date, "M월 d일", { locale: ko });

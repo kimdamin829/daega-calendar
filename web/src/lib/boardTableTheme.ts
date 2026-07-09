@@ -48,7 +48,7 @@ export const MAIN_BOARD_TYPOGRAPHY: BoardTableTypography = {
 export const BRANCH_BOARD_TYPOGRAPHY: BoardTableTypography = {
   gridCols: BOARD_GRID_COLS_BRANCH,
   headerText: `text-[42px] ${BOARD_FONT}`,
-  cellText: `text-[46px] ${BOARD_FONT}`,
+  cellText: `text-[50px] ${BOARD_FONT}`,
   timeText: `text-[50px] ${BOARD_FONT}`,
   suffixText: `text-[36px] ${BOARD_FONT}`,
   partyText: {
