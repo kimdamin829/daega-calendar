@@ -15,18 +15,18 @@ import {
 } from "@/lib/boardTableTheme";
 import { BRANCH_BOARD_COLUMN_SIZE, formatBoardTitle, type BoardEntry } from "@/lib/statusBoard";
 import {
+  BRANCH_HEADER_BG,
   BRANCH_ROW_DIVIDER,
   STATUS_BROWN,
   STATUS_CREAM,
   STATUS_FRAME_BORDER,
-  STATUS_HEADER_BG,
 } from "@/lib/statusDisplayTheme";
 
 const DESIGN_WIDTH = 1080;
 const DESIGN_HEIGHT = 1920;
 const BRANCH_TABLE_WIDTH = 920;
 const TYPO = BRANCH_BOARD_TYPOGRAPHY;
-const TITLE_TEXT = `text-[62px] ${BOARD_FONT} tracking-tight`;
+const TITLE_TEXT = `text-[65px] ${BOARD_FONT} tracking-tight`;
 const BRANCH_TABLE_BG = "/branch-board-table-bg.png";
 const TABLE_BG_OPACITY = 0.24;
 
@@ -71,7 +71,7 @@ function BoardTableHeader() {
   return (
     <div
       className={`grid shrink-0 ${TYPO.gridCols} px-10 py-3 ${TYPO.headerText}`}
-      style={{ backgroundColor: STATUS_HEADER_BG, color: STATUS_BROWN }}
+      style={{ backgroundColor: BRANCH_HEADER_BG, color: STATUS_BROWN }}
     >
       {BOARD_HEADER_LABELS.map((label) => (
         <span

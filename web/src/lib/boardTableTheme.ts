@@ -48,9 +48,9 @@ export const MAIN_BOARD_TYPOGRAPHY: BoardTableTypography = {
 export const BRANCH_BOARD_TYPOGRAPHY: BoardTableTypography = {
   gridCols: BOARD_GRID_COLS_BRANCH,
   headerText: `text-[42px] ${BOARD_FONT}`,
-  cellText: `text-[50px] ${BOARD_FONT}`,
-  timeText: `text-[50px] ${BOARD_FONT}`,
-  suffixText: `text-[36px] ${BOARD_FONT}`,
+  cellText: `text-[52px] ${BOARD_FONT}`,
+  timeText: `text-[52px] ${BOARD_FONT}`,
+  suffixText: `text-[38px] ${BOARD_FONT}`,
   partyText: {
     1: "text-[50px]",
     2: "text-[46px]",
@@ -59,9 +59,9 @@ export const BRANCH_BOARD_TYPOGRAPHY: BoardTableTypography = {
   seatShort: "text-[46px]",
   seatLong: "text-[42px]",
   seatTextTiers: {
-    max3: "text-[46px]",
-    max6: "text-[43px]",
-    max8: "text-[40px]",
+    max3: "text-[50px]",
+    max6: "text-[46px]",
+    max8: "text-[42px]",
   },
 };
 
