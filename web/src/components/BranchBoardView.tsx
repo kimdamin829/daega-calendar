@@ -16,6 +16,7 @@ import {
 import { BRANCH_BOARD_COLUMN_SIZE, formatBoardTitle, type BoardEntry } from "@/lib/statusBoard";
 import {
   BRANCH_HEADER_BG,
+  BRANCH_HEADER_TEXT,
   BRANCH_ROW_DIVIDER,
   STATUS_BROWN,
   STATUS_CREAM,
@@ -71,7 +72,7 @@ function BoardTableHeader() {
   return (
     <div
       className={`grid shrink-0 ${TYPO.gridCols} px-10 py-3 ${TYPO.headerText}`}
-      style={{ backgroundColor: BRANCH_HEADER_BG, color: STATUS_BROWN }}
+      style={{ backgroundColor: BRANCH_HEADER_BG, color: BRANCH_HEADER_TEXT }}
     >
       {BOARD_HEADER_LABELS.map((label) => (
         <span
