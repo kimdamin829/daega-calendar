@@ -7,7 +7,7 @@ import { buildBranchStatusBoard, buildStatusBoard } from "@/lib/statusBoard";
 import { syncBoardUrl } from "@/lib/urlState";
 
 /** 잠시 동안만 true — 끝나면 false로 되돌리면 기존 현황판 복구 */
-const SHOW_BRANCH_BOARD_POSTER = false;
+const SHOW_BRANCH_BOARD_POSTER = true;
 
 function useSyncBoardUrl() {
   useEffect(() => {
