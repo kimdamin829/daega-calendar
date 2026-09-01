@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { BoardGuestNameCell, BoardPartyLabel, BoardTableError } from "@/components/board/BoardTableCells";
+import { BoardHolidayFooterNotice } from "@/components/board/BoardHolidayFooterNotice";
 import { StatusTitleDivider } from "@/components/StatusTitleDivider";
 import { useBoardScale } from "@/hooks/useBoardScale";
 import {
@@ -21,7 +22,7 @@ const DESIGN_HEIGHT = 1080;
 const BG_OPACITY = 0.24;
 const TYPO = MAIN_BOARD_TYPOGRAPHY;
 
-const ROW_CLASS = `grid ${TYPO.gridCols} min-h-[78px] items-center px-10 text-center`;
+const ROW_CLASS = `grid ${TYPO.gridCols} min-h-[72px] items-center px-10 text-center`;
 const COLUMN_CLASS = "min-w-0 flex-1";
 const TITLE_TEXT = `text-[62px] ${BOARD_FONT}`;
 const TABLE_BODY_CLASS = "divide-y divide-[#f0ebe3]";
@@ -53,7 +54,7 @@ function BoardTableBackground({ centered }: { centered: boolean }) {
 function BoardTableHeader({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`grid ${TYPO.gridCols} px-10 py-4 text-center ${TYPO.headerText} tracking-wide ${className}`}
+      className={`grid ${TYPO.gridCols} px-10 py-3 text-center ${TYPO.headerText} tracking-wide ${className}`}
       style={{ backgroundColor: STATUS_HEADER_BG, color: STATUS_BROWN }}
     >
       {BOARD_HEADER_LABELS.map((label) => (
@@ -176,17 +177,21 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
           style={{ borderColor: STATUS_FRAME_BORDER }}
         />
 
-        <header className="relative z-10 flex shrink-0 flex-col items-center pt-14">
+        <header className="relative z-10 flex shrink-0 flex-col items-center pt-10">
           <h1 className={`${TITLE_TEXT} tracking-tight`}>{formatBoardTitle(date)}</h1>
         </header>
 
-        <StatusTitleDivider />
+        <StatusTitleDivider className="pb-2" />
 
-        <main className="relative z-10 mx-auto -mt-2 w-full shrink-0 px-12">
+        <main className="relative z-10 mx-auto -mt-3 w-full shrink-0 px-12">
           <div className="flex w-full justify-center">
             <BoardTable left={left} right={right} />
           </div>
         </main>
+
+        <footer className="relative z-10 flex shrink-0 flex-col items-center px-12 pt-3 pb-8 text-center">
+          <BoardHolidayFooterNotice />
+        </footer>
 
         <BoardTableError error={error} />
       </div>
