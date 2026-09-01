@@ -189,7 +189,7 @@ export function BoardView({ date, left, right, error }: BoardViewProps) {
           </div>
         </main>
 
-        <footer className="relative z-10 flex shrink-0 flex-col items-center px-12 pt-3 pb-8 text-center">
+        <footer className="relative z-10 -mt-[5px] flex shrink-0 flex-col items-center px-12 pt-3 pb-8 text-center">
           <BoardHolidayFooterNotice />
         </footer>
 
