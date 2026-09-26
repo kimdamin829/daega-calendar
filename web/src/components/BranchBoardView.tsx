@@ -4,7 +4,6 @@ import {
   BoardPartyLabel,
   BoardTableError,
 } from "@/components/board/BoardTableCells";
-import { BoardHolidayFooterNotice } from "@/components/board/BoardHolidayFooterNotice";
 import { StatusTitleDivider } from "@/components/StatusTitleDivider";
 import { useBoardScale } from "@/hooks/useBoardScale";
 import {
@@ -190,7 +189,9 @@ export function BranchBoardView({ date, entries, error }: BranchBoardViewProps) 
         </main>
 
         <footer className="relative z-10 flex shrink-0 flex-col items-center px-16 pt-4 pb-14 text-center">
-          <BoardHolidayFooterNotice maxWidthClassName="max-w-[880px]" />
+          <p className="text-[42px] leading-snug font-bold">
+            고객님의 방문에 진심으로 감사드립니다.
+          </p>
         </footer>
 
         <BoardTableError error={error} />

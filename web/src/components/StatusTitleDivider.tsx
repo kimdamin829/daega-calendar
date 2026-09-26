@@ -1,20 +1,14 @@
 import { STATUS_FRAME_BORDER } from "@/lib/statusDisplayTheme";
 
-export function StatusTitleDivider({
-  variant = "board",
-  className = "",
-}: {
-  variant?: "board" | "today";
-  className?: string;
-}) {
+export function StatusTitleDivider({ variant = "board" }: { variant?: "board" | "today" }) {
   const compact = variant === "today";
 
   return (
     <div
       className={
         compact
-          ? `flex shrink-0 items-center justify-center px-8 py-4 ${className}`
-          : `flex shrink-0 items-center justify-center px-32 pb-5 ${className}`
+          ? "flex shrink-0 items-center justify-center px-8 py-4"
+          : "flex shrink-0 items-center justify-center px-32 pb-5"
       }
     >
       <div className="h-px flex-1" style={{ backgroundColor: STATUS_FRAME_BORDER }} />
